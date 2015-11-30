@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using SWMS.Core.Extentions;
 using SWMS.Core.Helpers;
+using System.Diagnostics;
 
 namespace SWMS.Core
 {
@@ -29,7 +30,9 @@ namespace SWMS.Core
         public void ProcessMove(object sender, MultiSourceFrameArrivedEventArgs e)
         {
             Body[] bodys = null;
-            using (var bodyframe = e.FrameReference.AcquireFrame().BodyFrameReference.AcquireFrame())
+            var mFrame = e.FrameReference.AcquireFrame();
+
+            using (var bodyframe = mFrame.BodyFrameReference.AcquireFrame())
             {
                 if (bodyframe == null)
                 {
@@ -40,19 +43,13 @@ namespace SWMS.Core
                 bodyframe.GetAndRefreshBodyData(bodys);
             }
 
-            if (bodys == null)
-            {
-                return;
-            }
-
-
-            var body = bodys.FirstOrDefault();
+            var body = bodys.FirstOrDefault(b=>b.IsTracked);
             ProcessBody(body);
         }
 
         private void ProcessBody(Body body)
         {
-            if (body == null || !body.IsTracked)
+            if (body == null /*|| !body.IsTracked*/)
             {
                 return;
             }
@@ -61,34 +58,32 @@ namespace SWMS.Core
             var handLeft = body.Joints[JointType.HandLeft];
             var handRight = body.Joints[JointType.HandRight];
 
-            if (head.TrackingState != TrackingState.Tracked ||
-                handLeft.TrackingState != TrackingState.Tracked ||
-                handRight.TrackingState != TrackingState.Tracked)
+            if (head.TrackingState == TrackingState.NotTracked ||
+                handLeft.TrackingState == TrackingState.NotTracked ||
+                handRight.TrackingState == TrackingState.NotTracked)
             {
                 return;
             }
 
 
-            if (_initializedContext != null)
+            if (_initializedContext == null)
             {
-                if (body.HandRightState == HandState.Lasso)
+                if (body.HandRightState == HandState.Lasso && body.HandRightConfidence == TrackingConfidence.High)
                 {
-                    _initializedContext = new Tuple<JointType, DateTime>(JointType.HandRight, DateTime.UtcNow);
+                    _initializedContext = new Tuple<JointType, DateTime>(JointType.HandRight, DateTime.UtcNow, handRight.Position);
                 }
 
-                if (body.HandLeftState == HandState.Lasso)
+                if (body.HandLeftState == HandState.Lasso && body.HandRightConfidence == TrackingConfidence.High)
                 {
-                    _initializedContext = new Tuple<JointType, DateTime>(JointType.HandLeft, DateTime.UtcNow);
+                    _initializedContext = new Tuple<JointType, DateTime>(JointType.HandLeft, DateTime.UtcNow, handLeft.Position);
                 }
             }
-            else if (body.HandRightState != HandState.Lasso || body.HandLeftState != HandState.Lasso)
-            {
-                _initializedContext = null;
-            }
 
-            if (_initializedContext.Item2 - DateTime.UtcNow >= InitializationFazeSpan)
+            var now = DateTime.UtcNow;
+            var handPosition = body.Joints[_initializedContext.Item1].Position;
+            // TODO RORU implement stabilization of init gaster
+            if (_initializedContext != null && now - _initializedContext.Item2 >= InitializationFazeSpan)
             {
-                var handPosition = body.Joints[_initializedContext.Item1].Position;
 
                 var x = CoordinateHelper.FindPointProection(head.Position.GetProectionForXZ(), handPosition.GetProectionForXZ());
                 var y = CoordinateHelper.FindPointProection(head.Position.GetProectionForZY(), handPosition.GetProectionForZY());
@@ -99,7 +94,7 @@ namespace SWMS.Core
             
         }
 
-        private Tuple<JointType, DateTime> _initializedContext;
+        private Tuple<JointType, DateTime, CameraSpacePoint> _initializedContext;
         private static readonly TimeSpan InitializationFazeSpan = TimeSpan.FromSeconds(2d);
     }
 }
