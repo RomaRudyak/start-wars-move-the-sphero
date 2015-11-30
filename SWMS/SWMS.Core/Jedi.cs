@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SWMS.Core.Extentions;
+using SWMS.Core.Helpers;
 
 namespace SWMS.Core
 {
@@ -44,20 +46,60 @@ namespace SWMS.Core
             }
 
 
-            _body = bodys.FirstOrDefault();
-            if (_body == null)
+            var body = bodys.FirstOrDefault();
+            ProcessBody(body);
+        }
+
+        private void ProcessBody(Body body)
+        {
+            if (body == null || !body.IsTracked)
             {
                 return;
             }
 
-            ProcessBody();
-        }
+            var head = body.Joints[JointType.Head];
+            var handLeft = body.Joints[JointType.HandLeft];
+            var handRight = body.Joints[JointType.HandRight];
 
-        private void ProcessBody()
-        {
+            if (head.TrackingState != TrackingState.Tracked ||
+                handLeft.TrackingState != TrackingState.Tracked ||
+                handRight.TrackingState != TrackingState.Tracked)
+            {
+                return;
+            }
+
+
+            if (_initializedContext != null)
+            {
+                if (body.HandRightState == HandState.Lasso)
+                {
+                    _initializedContext = new Tuple<JointType, DateTime>(JointType.HandRight, DateTime.UtcNow);
+                }
+
+                if (body.HandLeftState == HandState.Lasso)
+                {
+                    _initializedContext = new Tuple<JointType, DateTime>(JointType.HandLeft, DateTime.UtcNow);
+                }
+            }
+            else if (body.HandRightState != HandState.Lasso || body.HandLeftState != HandState.Lasso)
+            {
+                _initializedContext = null;
+            }
+
+            if (_initializedContext.Item2 - DateTime.UtcNow >= InitializationFazeSpan)
+            {
+                var handPosition = body.Joints[_initializedContext.Item1].Position;
+
+                var x = CoordinateHelper.FindPointProection(head.Position.GetProectionForXZ(), handPosition.GetProectionForXZ());
+                var y = CoordinateHelper.FindPointProection(head.Position.GetProectionForZY(), handPosition.GetProectionForZY());
+
+                ForceActivated.SafeRise(this, new PointF { X = x, Y = y});
+                _initializedContext = null;
+            }
             
         }
 
-        private Body _body;
+        private Tuple<JointType, DateTime> _initializedContext;
+        private static readonly TimeSpan InitializationFazeSpan = TimeSpan.FromSeconds(2d);
     }
 }
