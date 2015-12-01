@@ -1,7 +1,7 @@
 ﻿<Window x:Class="SWMS.WPF.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="MainWindow" Height="350" Width="525">
+        Title="MainWindow">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition/>
@@ -11,12 +11,16 @@
             <ColumnDefinition/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <Viewbox Grid.Row="0" Grid.ColumnSpan="2" HorizontalAlignment="Center">
+        <Viewbox Grid.Row="0" HorizontalAlignment="Center">
             <Image x:Name="Image" Stretch="UniformToFill" />
         </Viewbox>
-        <TextBlock Grid.Row="1" Grid.Column="0" x:Name="Out">
+        <Canvas x:Name="coords" Grid.Column="1" Height="400" Width="400">
+            <Line X1="0" Y1="200" X2="400" Y2="200" Stroke="Black"/>
+            <Line X1="200" Y1="0" X2="200" Y2="400" Stroke="Black"/>
+            <Ellipse x:Name="epoint" Height="10" Width="10" Fill="Red" Canvas.Left="195" Canvas.Top="195"/>
+        </Canvas>
+        <TextBox Grid.Row="1" Grid.Column="0" x:Name="Out">
             
-        </TextBlock>
-        <Button Grid.Row="1" Grid.Column="1" Content="Clear" Click="Button_Click"/>
+        </TextBox>
     </Grid>
 </Window>

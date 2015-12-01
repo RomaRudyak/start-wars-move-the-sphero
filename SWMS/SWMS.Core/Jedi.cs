@@ -44,12 +44,8 @@ namespace SWMS.Core
             }
 
             var body = bodys.FirstOrDefault(b=>b.IsTracked);
-            ProcessBody(body);
-        }
 
-        private void ProcessBody(Body body)
-        {
-            if (body == null /*|| !body.IsTracked*/)
+            if (body == null)
             {
                 return;
             }
@@ -65,36 +61,61 @@ namespace SWMS.Core
                 return;
             }
 
+            CameraSpacePoint newPoint;
 
-            if (_initializedContext == null)
+            if (IsHandInInitialGesture(body.HandRightState, body.HandRightConfidence))
             {
-                if (body.HandRightState == HandState.Lasso && body.HandRightConfidence == TrackingConfidence.High)
-                {
-                    _initializedContext = new Tuple<JointType, DateTime, CameraSpacePoint>(JointType.HandRight, DateTime.UtcNow, handRight.Position);
-                }
-
-                if (body.HandLeftState == HandState.Lasso && body.HandRightConfidence == TrackingConfidence.High)
-                {
-                    _initializedContext = new Tuple<JointType, DateTime, CameraSpacePoint>(JointType.HandLeft, DateTime.UtcNow, handLeft.Position);
-                }
+                newPoint = handRight.Position;
+            } 
+            else if (IsHandInInitialGesture(body.HandLeftState, body.HandLeftConfidence))
+            {
+                newPoint = handLeft.Position;
+            }
+            else
+            {
+                _handTrackedCount = 0;
+                _headTrackedCount = 0;
+                return;
             }
 
-            var now = DateTime.UtcNow;
-            var handPosition = body.Joints[_initializedContext.Item1].Position;
-            // TODO RORU implement stabilization of init gaster
-            if (_initializedContext != null && now - _initializedContext.Item2 >= InitializationFazeSpan)
+            _lastHeadPosition = _lastHeadPosition.GetAccumulatedAvarage(head.Position, _headTrackedCount);
+            _lastHandPosition = _lastHandPosition.GetAccumulatedAvarage(newPoint, _handTrackedCount);
+
+            _handTrackedCount++;
+            _headTrackedCount++;
+
+            Debug.WriteLine("Hand tracked: {0}", _handTrackedCount);
+
+            if (_handTrackedCount == 15)
             {
+                var handPosition = _lastHandPosition;
+                var headPosition = _lastHeadPosition;
 
-                var x = CoordinateHelper.FindPointProection(head.Position.GetProectionForXZ(), handPosition.GetProectionForXZ());
-                var y = CoordinateHelper.FindPointProection(head.Position.GetProectionForZY(), handPosition.GetProectionForZY());
+                var x = CoordinateHelper.FindPointProection(headPosition.GetProectionForXZ(), handPosition.GetProectionForXZ());
+                var y = CoordinateHelper.FindPointProection(headPosition.GetProectionForZY(), handPosition.GetProectionForZY());
 
-                ForceActivated.SafeRise(this, new PointF { X = x, Y = y});
-                _initializedContext = null;
+                var point = new PointF { X = x, Y = y };
+                ForceActivated.SafeRise(this, point);
+                Debug.WriteLine("Point: x={0} y={1}", point.X, point.Y);
+                _handTrackedCount=0;
+                _headTrackedCount=0;
             }
+
             
         }
 
-        private Tuple<JointType, DateTime, CameraSpacePoint> _initializedContext;
+        private Boolean IsHandInInitialGesture(HandState handState, TrackingConfidence trackingCondition)
+        {
+            return handState == InitialHandState && trackingCondition == TrackingConfidence.High;
+        }
+
+
+        private CameraSpacePoint _lastHandPosition;
+        private CameraSpacePoint _lastHeadPosition;
+        private Int32 _handTrackedCount = 0;
+        private Int32 _headTrackedCount = 0;
+        private Tuple<JointType, DateTime, CameraSpacePoint> _initializationContext;
         private static readonly TimeSpan InitializationFazeSpan = TimeSpan.FromSeconds(2d);
+        private static readonly HandState InitialHandState = HandState.Lasso;
     }
 }

@@ -34,7 +34,11 @@ namespace SWMS.Core.Helpers
             var tgAlpha = kmDistance / kbDistance;
             var abDistnce = CoordinateHelper.GetDistance(a, b);
             var acDistance = abDistnce * tgAlpha;
-            return a.X + Convert.ToSingle(acDistance);
+            return a.X < m.X
+                ? a.X + Convert.ToSingle(acDistance)
+                : a.X - Convert.ToSingle(acDistance);
         }
+
+
     }
 }

@@ -67,13 +67,11 @@ namespace SWMS.WPF
 
         private void _jedi_ForceActivated(object sender, PointF point)
         {
-            Out.Text += String.Format("Initial point: x={0} y={1}\n", point.X, point.Y);
+            Out.Text = String.Format("Initial point: x={0:F2} y={1:F2}\n", point.X, point.Y);
+            Canvas.SetLeft(this.epoint, 200 + point.X * 10);
+            Canvas.SetTop(this.epoint, 200 + point.Y * 10);
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            Out.Text = "";
-        }
 
         #endregion For debbuging
 
