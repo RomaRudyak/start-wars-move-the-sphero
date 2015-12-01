@@ -70,12 +70,12 @@ namespace SWMS.Core
             {
                 if (body.HandRightState == HandState.Lasso && body.HandRightConfidence == TrackingConfidence.High)
                 {
-                    _initializedContext = new Tuple<JointType, DateTime>(JointType.HandRight, DateTime.UtcNow, handRight.Position);
+                    _initializedContext = new Tuple<JointType, DateTime, CameraSpacePoint>(JointType.HandRight, DateTime.UtcNow, handRight.Position);
                 }
 
                 if (body.HandLeftState == HandState.Lasso && body.HandRightConfidence == TrackingConfidence.High)
                 {
-                    _initializedContext = new Tuple<JointType, DateTime>(JointType.HandLeft, DateTime.UtcNow, handLeft.Position);
+                    _initializedContext = new Tuple<JointType, DateTime, CameraSpacePoint>(JointType.HandLeft, DateTime.UtcNow, handLeft.Position);
                 }
             }
 
