@@ -99,6 +99,10 @@
     <Resource Include="ReadMe.Coding4Fun.Toolkit.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\SWMS.Core.JediSphero\SWMS.Core.JediSphero.csproj">
+      <Project>{ed9b959a-655b-4a28-8afd-8eb57285a982}</Project>
+      <Name>SWMS.Core.JediSphero</Name>
+    </ProjectReference>
     <ProjectReference Include="..\SWMS.Core\SWMS.Core.csproj">
       <Project>{5c5b5864-84a4-43c0-abee-f689708ca77e}</Project>
       <Name>SWMS.Core</Name>
