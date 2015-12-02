@@ -132,6 +132,8 @@ namespace SWMS.Server
         private KinectSensor _sensor;
         private MultiSourceFrameReader _multiReader;
         private CoordinateMapper _coordinateMapper;
+        private Jedi _jedi;
+        private Boolean _isJediInitialization = false;
 
         private void ConnectToSheroButton_OnClick(object sender, RoutedEventArgs e)
         {
@@ -146,6 +148,28 @@ namespace SWMS.Server
             }
 
             Device.EndConfigure();
+            _jedi = new Jedi();
+            _multiReader.MultiSourceFrameArrived += _jedi.ProcessMove;
+
+            _jedi.ForceApplying += JediForceApplying;
+            _jedi.ForceDispel += JediForceDispel;
+        }
+
+        private void JediForceDispel(object obj)
+        {
+            _isJediInitialization = false;
+        }
+
+        private void JediForceApplying(object arg1, PointF point)
+        {
+            if (_isJediInitialization)
+	        {
+                Device.SetConfigurePosition(point.X, point.Y);
+                _isJediInitialization = true;
+                return;
+            }
+
+            Device.MoveTo(point.X*5, point.Y*5);
         }
 
         private void SpheroAngle_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
