@@ -51,18 +51,20 @@ namespace SWMS.WPF.Test
 
 
             _jedi = new Jedi();
-
-            // NOTE: RORU Hook up Sphero on the Jedi events
-            //_jedi.ForceActivated += _jedi_ForceActivated;
-            _jedi.ForceApplying += _jedi_ForceApplying;
-            // _jedi.ForceDispel += _jedi_ForceDispel;
+            _jedi.ForceApplying += ForceApplying;
+            _jedi.ForceDispel += ForceDispel;
 
             _frameReader =  _sensor.OpenMultiSourceFrameReader(FrameSourceTypes.Body | FrameSourceTypes.Depth | FrameSourceTypes.Color);
 
-            _frameReader.MultiSourceFrameArrived +=_frameReader_MultiSourceFrameArrived;
+            _frameReader.MultiSourceFrameArrived +=MultiSourceFrameArrived;
         }
 
-        private void _frameReader_MultiSourceFrameArrived(object sender, MultiSourceFrameArrivedEventArgs e)
+        private void ForceDispel(object obj)
+        {
+            this.epointXZ.Visibility = Visibility.Hidden;
+        }
+
+        private void MultiSourceFrameArrived(object sender, MultiSourceFrameArrivedEventArgs e)
         {
             _jedi.ProcessMove(sender, e);
             using (var bodyFrame = e.FrameReference.AcquireFrame().BodyFrameReference.AcquireFrame())
@@ -105,24 +107,16 @@ namespace SWMS.WPF.Test
             Canvas.SetTop(el, 395 + head.Position.Y * -40);
         }
 
-        #region For debbuging
-
-        private void _jedi_ForceActivated(object sender, PointF point)
+        private void ForceApplying(object sender, PointF point)
         {
-            Out.Text = String.Format("Initial point: x={0:F2} y={1:F2}\n", point.X, point.Y);
-        }
-
-        private void _jedi_ForceApplying(object sender, PointF point)
-        {
-            Out.Text += String.Format("x={0:F2} y={1:F2}\n", point.X, point.Y);
-            Out.CaretIndex = Out.Text.Length;
+            Out.Text = Out.Text.Insert(0, String.Format("x={0:F2} y={1:F2}\n", point.X, point.Y));
             // XZ
+            this.epointXZ.Visibility = Visibility.Visible;
             Canvas.SetLeft(this.epointXZ, 195 + point.X * 40);
             Canvas.SetTop(this.epointXZ, 195 + point.Y * 40);
         }
 
 
-        #endregion For debbuging
 
         private KinectSensor _sensor;
         private MultiSourceFrameReader _frameReader;

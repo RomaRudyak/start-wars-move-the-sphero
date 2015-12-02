@@ -13,11 +13,6 @@ namespace SWMS.Core
     public class Jedi
     {
         /// <summary>
-        /// Fires when Jedi activates force
-        /// </summary>
-        public event Action<Object, PointF> ForceActivated;
-
-        /// <summary>
         /// Fires when Jedi moving something with force
         /// </summary>
         public event Action<Object, PointF> ForceApplying;
@@ -25,7 +20,7 @@ namespace SWMS.Core
         /// <summary>
         /// Fires when Jedi stop using the force
         /// </summary>
-        public event Action ForceDispel;
+        public event Action<Object> ForceDispel;
 
         public void ProcessMove(object sender, MultiSourceFrameArrivedEventArgs e)
         {
@@ -63,40 +58,47 @@ namespace SWMS.Core
                 return;
             }
 
-            CameraSpacePoint newPoint;
+            TrackForeMove(body, head, handLeft, handRight);
+        }
 
-            if (IsHandInInitialGesture(body.HandRightState, body.HandRightConfidence))
+        private void TrackForeMove(Body body, Joint head, Joint handLeft, Joint handRight)
+        {
+            CameraSpacePoint newPoint = default(CameraSpacePoint);
+
+            if (IsHandInInitialGesture(body.HandRightState))
             {
                 newPoint = handRight.Position;
-                Debug.WriteLine("Right hand");
-            } 
-            else if (IsHandInInitialGesture(body.HandLeftState, body.HandLeftConfidence))
+                Debug.WriteLine("Force hand: Right");
+            }
+            else if (IsHandInInitialGesture(body.HandLeftState))
             {
                 newPoint = handLeft.Position;
-                Debug.WriteLine("Left hand");
+                Debug.WriteLine("Force hand: Left");
+            }
+
+            if (newPoint != default(CameraSpacePoint))
+            {
+                var distance = CoordinateHelper.GetDistance(newPoint, _lastHandPosition);
+                if (_handTrackedCount > 0 && distance > 0.15F)
+                {
+                    Debug.WriteLine("oldPoint: x={0} y={1} z={2}", _lastHandPosition.X, _lastHandPosition.Y, _lastHandPosition.Z);
+                    Debug.WriteLine("newPoint: x={0} y={1} z={2}", newPoint.X, newPoint.Y, newPoint.Z);
+                    ResetTrackingCounters(1);
+                    Debug.WriteLine("Reseted in order ot distance: {0}", distance);
+                }
+
+                _lastHeadPosition = _lastHeadPosition.GetAccumulatedAvarage(head.Position, ref _headTrackedCount);
+                _lastHandPosition = _lastHandPosition.GetAccumulatedAvarage(newPoint, ref _handTrackedCount);
+
+                Debug.WriteLine("Forse tracked: {0} Frame: {1}", _handTrackedCount, _frameCount);
             }
             else
             {
-                return;
+                Debug.WriteLine("Forse not tracked");
             }
 
-            var distance = CoordinateHelper.GetDistance(newPoint, _lastHandPosition);
-            if (_handTrackedCount > 0 && distance > 0.15F)
-            {
-                Debug.WriteLine("oldPoint: x={0} y={1} z={2}", _lastHandPosition.X, _lastHandPosition.Y, _lastHandPosition.Z);
-                Debug.WriteLine("newPoint: x={0} y={1} z={2}", newPoint.X, newPoint.Y, newPoint.Z);
-                ResetTrackingCounters(1);
-                Debug.WriteLine("Reseted in order ot distance: {0}", distance);
-            }
 
-            _lastHeadPosition = _lastHeadPosition.GetAccumulatedAvarage(head.Position, ref _headTrackedCount);
-            _lastHandPosition = _lastHandPosition.GetAccumulatedAvarage(newPoint, ref _handTrackedCount);
-
-            Debug.WriteLine("Hand tracked: {0} Frame: {1}", _handTrackedCount, _frameCount);
-
-
-
-            if (CanFireForeMove())
+            if (CanFireForesMove())
             {
                 var handPosition = _lastHandPosition;
                 var headPosition = _lastHeadPosition;
@@ -107,16 +109,27 @@ namespace SWMS.Core
 
                 var point = new PointF { X = x, Y = y };
                 ForceApplying.SafeRise(this, point);
-                Debug.WriteLine("Point: x={0} y={1}", point.X, point.Y);
+                Debug.WriteLine("Force Point: x={0} y={1}", point.X, point.Y);
                 ResetTrackingCounters();
             }
 
-            
+            if (CanFireForesDispel())
+            {
+                ForceDispel.SafeRise(this);
+                ResetTrackingCounters();
+            }
         }
 
-        private bool CanFireForeMove()
+        private Boolean CanFireForesDispel()
         {
-            return _frameCount % 7 == 0 && _handTrackedCount >= 7;
+            return _handTrackedCount != 0 && _handTrackedCount != _frameCount;
+        }
+
+        private Boolean CanFireForesMove()
+        {
+            // 1/6 sec
+            var machNum = 4;
+            return _frameCount % machNum == 0 && _handTrackedCount == machNum;
         }
 
         private void ResetTrackingCounters(int reset = 0)
@@ -126,7 +139,7 @@ namespace SWMS.Core
             _frameCount = 0;
         }
 
-        private Boolean IsHandInInitialGesture(HandState handState, TrackingConfidence trackingCondition)
+        private Boolean IsHandInInitialGesture(HandState handState)
         {
             return handState == InitialHandState;
         }
@@ -136,8 +149,6 @@ namespace SWMS.Core
         private CameraSpacePoint _lastHeadPosition;
         private Int32 _handTrackedCount = 0;
         private Int32 _headTrackedCount = 0;
-        private Tuple<JointType, DateTime, CameraSpacePoint> _initializationContext;
-        private static readonly TimeSpan InitializationFazeSpan = TimeSpan.FromSeconds(2d);
         private static readonly HandState InitialHandState = HandState.Open;
     }
 }

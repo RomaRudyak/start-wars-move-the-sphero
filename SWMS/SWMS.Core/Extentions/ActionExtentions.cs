@@ -18,5 +18,16 @@ namespace SWMS.Core.Extentions
 
             handlers(sender, args);
         }
+
+        public static void SafeRise(this Action<Object> source, Object sender)
+        {
+            var handlers = source;
+            if (handlers == null)
+            {
+                return;
+            }
+
+            handlers(sender);
+        }
     }
 }
