@@ -46,7 +46,7 @@
                 >
                 
                 <TextBlock
-                    Text="{Binding ElementName=SpheroAngle, Path=Value, StringFormat={}Angel: {0}, UpdateSourceTrigger=PropertyChanged}"
+                    Text="{Binding ElementName=SpheroAngle, Path=Value, StringFormat={}Angle: {0}, UpdateSourceTrigger=PropertyChanged}"
                     />
                 
                 <Slider
@@ -57,6 +57,7 @@
                     IsSnapToTickEnabled="True"
                     TickFrequency="1"
                     TickPlacement="Both"
+                    ValueChanged="SpheroAngle_ValueChanged"
                     />
 
                 <TextBlock
@@ -71,12 +72,11 @@
                     IsSnapToTickEnabled="True"
                     TickFrequency="1"
                     TickPlacement="Both"
+                    ValueChanged="SpheroSpeed_ValueChanged"
                     />
 
-                <Button
-                    Content="Configured"
-                    />
-                
+                <Button Content="Configured" Click="ConfiguredButton_OnClick"/>
+                <Button Content="Connect to Sphero" Click="ConnectToSheroButton_OnClick"/>
             </StackPanel>
             
         </Grid>

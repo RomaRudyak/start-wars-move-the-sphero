@@ -13,6 +13,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using SWMS.Core;
+using System.Diagnostics;
 
 namespace SWMS.Server
 {
@@ -27,6 +29,8 @@ namespace SWMS.Server
             this.Loaded += MainWindow_Loaded;
             this.Closed += MainWindow_Closed;
         }
+
+        public SWMS.Core.Sphero Device { get; set; }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
@@ -47,6 +51,25 @@ namespace SWMS.Server
             _sensor.Open();
 
             UpdateKinectStaus(_sensor.IsAvailable);
+        }
+
+        private async void GetSphero()
+        {
+            if (Device != null)
+            {
+                MessageBox.Show("Sphero already connected");
+                return;
+            }
+
+            Device = await SpheroManager.GetSpheroAsync();
+            if (Device == null)
+            {
+                MessageBox.Show("Sphero not found");
+                return;
+            }
+
+            MessageBox.Show("Sphero connected");
+            Device.BeginConfigure();
         }
 
         private void FrameArrived(object sender, MultiSourceFrameArrivedEventArgs e)
@@ -109,5 +132,42 @@ namespace SWMS.Server
         private KinectSensor _sensor;
         private MultiSourceFrameReader _multiReader;
         private CoordinateMapper _coordinateMapper;
+
+        private void ConnectToSheroButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            GetSphero();
+        }
+
+        private void ConfiguredButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            if (Device == null)
+            {
+                return;
+            }
+
+            Device.EndConfigure();
+        }
+
+        private void SpheroAngle_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (Device == null)
+            {
+                return;
+            }
+            var angleValue = e.NewValue % 360;
+            Debug.WriteLine("Speed angle value: {0}", angleValue);
+            Device.SetConfigureAngle((int)angleValue);
+        }
+
+        private void SpheroSpeed_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+            if (Device == null)
+            {
+                return;
+            }
+            double newValue = e.NewValue / 255;
+            Debug.WriteLine("Speed scale value: {0}", newValue);
+            Device.ChangeSpeedScale(newValue);
+        }
     }
 }
