@@ -68,8 +68,8 @@ namespace SWMS.Server
                 MessageBox.Show("Sphero not found");
                 return;
             }
+            SpheroName.Content = String.Format("Connected: {0}", Device.Name);
 
-            MessageBox.Show("Sphero connected");
             Device.BeginConfigure();
         }
 
@@ -154,6 +154,9 @@ namespace SWMS.Server
                 return;
             }
 
+            double newValue = this.SpheroSpeed.Value / 255;
+            Debug.WriteLine("Speed scale value: {0}", newValue);
+            Device.ChangeSpeedScale(newValue);
             Device.EndConfigure();
             InitializeJedi();
         }
@@ -197,17 +200,6 @@ namespace SWMS.Server
             var angleValue = e.NewValue % 360;
             Debug.WriteLine("Speed angle value: {0}", angleValue);
             Device.SetConfigureAngle((int)angleValue);
-        }
-
-        private void SpheroSpeed_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-        {
-            if (Device == null)
-            {
-                return;
-            }
-            double newValue = e.NewValue / 255;
-            Debug.WriteLine("Speed scale value: {0}", newValue);
-            Device.ChangeSpeedScale(newValue);
         }
     }
 }

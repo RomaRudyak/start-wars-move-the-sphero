@@ -41,6 +41,19 @@
 
             <StackPanel
                 Grid.Column="1"
+                Grid.Row="0">
+            
+                <Button 
+                    Content="Connect to Sphero" 
+                    Click="ConnectToSheroButton_OnClick"/>
+                <Label 
+                    x:Name="SpheroName" />
+
+            </StackPanel>
+
+
+            <StackPanel
+                Grid.Column="1"
                 Grid.Row="1"
                 
                 >
@@ -71,9 +84,7 @@
                     Value="60"
                     TickFrequency="1"
                     TickPlacement="Both"
-                    ValueChanged="SpheroSpeed_ValueChanged"
                     />
-                <Button Content="Connect to Sphero" Click="ConnectToSheroButton_OnClick"/>
                 <Button Content="Configured" Click="ConfiguredButton_OnClick"/>
             </StackPanel>
 
