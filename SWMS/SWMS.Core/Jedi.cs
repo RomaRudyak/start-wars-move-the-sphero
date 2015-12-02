@@ -29,7 +29,7 @@ namespace SWMS.Core
 
         public Jedi(MultiSourceFrameReader reader)
         {
-            _reader = sensor;
+            _reader = reader;
             _reader.MultiSourceFrameArrived += ProcessMove;
         }
 
