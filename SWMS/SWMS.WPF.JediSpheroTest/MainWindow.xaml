@@ -18,7 +18,7 @@
         <Grid Grid.Column="1" Grid.Row="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
-                <RowDefinition Height="30"/>
+                <RowDefinition Height="100"/>
                 <RowDefinition Height="10"/>
                 <RowDefinition Height="30"/>
                 <RowDefinition Height="10"/>
@@ -31,7 +31,13 @@
                 </Canvas>
             </Grid>
             <Grid Grid.Row="1">
-                <Slider Minimum="0" Maximum="720" ValueChanged="RangeBase_OnValueChanged"/>
+                <StackPanel>
+                    <Label>Angle</Label>
+                    <Slider Minimum="0" Maximum="360" ValueChanged="AngleConfigure_OnValueChanged"/>
+
+                    <Label>Speed scale</Label>
+                    <Slider Minimum="0" Maximum="255" ValueChanged="SpeedScaleConfigure_OnValueChanged"/>
+                </StackPanel>
             </Grid>
 
             <Grid Grid.Row="3">
@@ -56,19 +62,11 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="10"/>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="10"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="10"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="10"/>
-                    <ColumnDefinition Width="*"/>
+
                 </Grid.ColumnDefinitions>
                 <Button Grid.Column="0" Click="SearchAndConnectSpheroButton_OnClick">Connect</Button>
-                <Button Grid.Column="2" Click="RedButton_OnClick">Red</Button>
-                <Button Grid.Column="4" Click="GreenButton_OnClick">Green</Button>
-                <Button Grid.Column="6" Click="BlueButton_OnClick">Blue</Button>
-                <Button Grid.Column="8" Click="BeginConfigureButton_OnClick">Begin Configure</Button>
-                <Button Grid.Column="10" Click="EndConfigureButton_OnClick">End Configure</Button>
+                <Button Grid.Column="2" Click="BeginConfigureButton_OnClick">Begin Configure</Button>
+                <Button Grid.Column="4" Click="EndConfigureButton_OnClick">End Configure</Button>
             </Grid>
         </Grid>
 

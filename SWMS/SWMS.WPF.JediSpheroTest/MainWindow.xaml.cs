@@ -52,24 +52,12 @@ namespace SWMS.WPF.JediSpheroTest
             set { SetValue(SpheroPositionYProperty, value); }
         }
 
-        private Core.Sphero _device;
+        private JediSphero _device;
         public bool IsCaptured { get; set; }
 
 
         private void SearchAndConnectSpheroButton_OnClick(object sender, RoutedEventArgs e)
         {
-            if (_device != null)
-            {
-                if (_device.IsConnected)
-                {
-                    _device.Disconnect();
-                    MessageBox.Show(string.Format("Device is connected: {0}", _device.IsConnected));
-                }
-                else
-                {
-                    MessageBox.Show("WAT??");
-                }
-            }
             Task.Run(() => SearchSphero());
         }
 
@@ -109,59 +97,59 @@ namespace SWMS.WPF.JediSpheroTest
 
         private void Window_OnKeyDown(object sender, KeyEventArgs e)
         {
-            if (_device == null)
-            {
-                return;
-            }
+            return;
 
-            int angle = 0;
-            bool async = false;
+            //if (_device == null)
+            //{
+            //    return;
+            //}
 
-            switch (e.Key)
-            {
-                case Key.W:
-                    angle = 0;
-                    break;
+            //int angle = 0;
+            //bool async = false;
 
-                case Key.D:
-                    angle = 90;
-                    break;
+            //switch (e.Key)
+            //{
+            //    case Key.W:
+            //        angle = 0;
+            //        break;
 
-                case Key.S:
-                    angle = 180;
-                    break;
+            //    case Key.D:
+            //        angle = 90;
+            //        break;
 
-                case Key.A:
-                    angle = 270;
-                    break;
+            //    case Key.S:
+            //        angle = 180;
+            //        break;
 
-                case Key.D8:
-                    angle = 0;
-                    async = true;
-                    break;
+            //    case Key.A:
+            //        angle = 270;
+            //        break;
 
-                case Key.D6:
-                    angle = 90;
-                    async = true;
-                    break;
+            //    case Key.D8:
+            //        angle = 0;
+            //        async = true;
+            //        break;
 
-                case Key.D5:
-                    angle = 180;
-                    async = true;
-                    break;
+            //    case Key.D6:
+            //        angle = 90;
+            //        async = true;
+            //        break;
 
-                case Key.D4:
-                    angle = 270;
-                    async = true;
-                    break;
-                default:
-                    return;
-            }
+            //    case Key.D5:
+            //        angle = 180;
+            //        async = true;
+            //        break;
 
-            _device.Roll(angle, 0.5F);
+            //    case Key.D4:
+            //        angle = 270;
+            //        async = true;
+            //        break;
+            //    default:
+            //        return;
+            //}
 
+            //_device.Roll(angle, 0.5F);
         }
-
 
         private void SpheroPositionGrid_OnMouseUp(object sender, MouseButtonEventArgs e)
         {
@@ -184,7 +172,8 @@ namespace SWMS.WPF.JediSpheroTest
                 return;
             }
 
-            int scale = 1;
+            // grid 500x500
+            int scale = (500 / 2);
 
             if (!_device.IsInitialized)
             {
@@ -218,13 +207,23 @@ namespace SWMS.WPF.JediSpheroTest
             }
         }
 
-        private void RangeBase_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        private void AngleConfigure_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
 
             if (_device != null)
             {
                 int angle = (int)e.NewValue;
                 _device.SetConfigureAngle(angle);
+            }
+        }
+
+        private void SpeedScaleConfigure_OnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        {
+
+            if (_device != null)
+            {
+                double speedScale = e.NewValue / 255.0;
+                _device.SetSpeedScale(speedScale);
             }
         }
 
