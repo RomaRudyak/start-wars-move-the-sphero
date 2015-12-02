@@ -11,13 +11,20 @@
             <ColumnDefinition/>
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
-        <Viewbox Grid.Row="0" HorizontalAlignment="Center">
-            <Image x:Name="Image" Stretch="UniformToFill" />
-        </Viewbox>
-        <Canvas x:Name="coords" Grid.Column="1" Height="400" Width="400">
+        <Canvas x:Name="coordsZY" Grid.Column="0" Height="400" Width="400">
+            <Label Content="ZY"/>
+            <Line X1="0" Y1="400" X2="400" Y2="400" Stroke="Black"/>
+            <Line X1="200" Y1="0" X2="200" Y2="400" Stroke="Black"/>
+            <Ellipse x:Name="headZY" Height="10" Width="10" Fill="Blue" Canvas.Left="0" Canvas.Top="400"/>
+            <Ellipse x:Name="heand1ZY" Height="10" Width="10" Fill="Green" Canvas.Left="0" Canvas.Top="400"/>
+        </Canvas>
+        <Canvas x:Name="coordsXZ" Grid.Column="1" Height="400" Width="400">
+            <Label Content="XZ" />
             <Line X1="0" Y1="200" X2="400" Y2="200" Stroke="Black"/>
             <Line X1="200" Y1="0" X2="200" Y2="400" Stroke="Black"/>
-            <Ellipse x:Name="epoint" Height="10" Width="10" Fill="Red" Canvas.Left="195" Canvas.Top="195"/>
+            <Ellipse x:Name="epointXZ" Height="10" Width="10" Fill="Red" Canvas.Left="195" Canvas.Top="195"/>
+            <Ellipse x:Name="headXZ" Height="10" Width="10" Fill="Blue" Canvas.Left="195" Canvas.Top="195"/>
+            <Ellipse x:Name="heandXZ" Height="10" Width="10" Fill="Green" Canvas.Left="195" Canvas.Top="195"/>
         </Canvas>
         <TextBox Grid.Row="1" Grid.Column="0" x:Name="Out">
             

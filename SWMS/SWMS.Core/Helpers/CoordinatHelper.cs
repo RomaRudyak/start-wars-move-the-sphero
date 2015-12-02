@@ -14,6 +14,11 @@ namespace SWMS.Core.Helpers
             return Math.Abs(Math.Sqrt(Math.Pow(p2.X - p1.X, 2) + Math.Pow(p2.Y - p1.Y, 2)));
         }
 
+        public static Double GetDistance(CameraSpacePoint p1, CameraSpacePoint p2)
+        {
+            return Math.Abs(Math.Sqrt(Math.Pow(p2.X - p1.X, 2) + Math.Pow(p2.Y - p1.Y, 2) + Math.Pow(p2.Z - p1.Z, 2)));
+        }
+
         public static Single FindPointProection(PointF b, PointF m)
         {
             // Floor
@@ -23,6 +28,7 @@ namespace SWMS.Core.Helpers
                 Y = 0F
             };
 
+            // Point on height
             var k = new PointF
             {
                 X = b.X,
@@ -34,6 +40,10 @@ namespace SWMS.Core.Helpers
             var tgAlpha = kmDistance / kbDistance;
             var abDistnce = CoordinateHelper.GetDistance(a, b);
             var acDistance = abDistnce * tgAlpha;
+            var c = new PointF
+            {
+                X = 0F
+            };
             return a.X < m.X
                 ? a.X + Convert.ToSingle(acDistance)
                 : a.X - Convert.ToSingle(acDistance);

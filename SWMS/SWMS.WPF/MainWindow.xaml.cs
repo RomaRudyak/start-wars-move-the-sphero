@@ -48,19 +48,61 @@ namespace SWMS.WPF
 
             // create the bitmap to display
             this._colorBitmap = new WriteableBitmap(colorFrameDescription.Width, colorFrameDescription.Height, 96.0, 96.0, PixelFormats.Bgr32, null);
-            this.Image.Source = this._colorBitmap;
 
 
             _jedi = new Jedi();
 
             // NOTE: RORU Hook up Sphero on the Jedi events
-            _jedi.ForceActivated += _jedi_ForceActivated;
-            // _jedi.ForceApplying += _jedi_ForceApplying;
+            //_jedi.ForceActivated += _jedi_ForceActivated;
+            _jedi.ForceApplying += _jedi_ForceApplying;
             // _jedi.ForceDispel += _jedi_ForceDispel;
 
             _frameReader =  _sensor.OpenMultiSourceFrameReader(FrameSourceTypes.Body | FrameSourceTypes.Depth | FrameSourceTypes.Color);
 
-            _frameReader.MultiSourceFrameArrived += _frameReader_MultiSourceFrameArrived;
+            _frameReader.MultiSourceFrameArrived +=_frameReader_MultiSourceFrameArrived;
+        }
+
+        private void _frameReader_MultiSourceFrameArrived(object sender, MultiSourceFrameArrivedEventArgs e)
+        {
+            _jedi.ProcessMove(sender, e);
+            using (var bodyFrame = e.FrameReference.AcquireFrame().BodyFrameReference.AcquireFrame())
+            {
+                var bodys = new Body[6];
+
+                if (bodyFrame == null)
+                {
+                    return;
+                }
+
+                bodyFrame.GetAndRefreshBodyData(bodys);
+
+                var b = bodys.FirstOrDefault(body => body.IsTracked);
+                if (b == null)
+                {
+                    return;
+                }
+
+                var head = b.Joints[JointType.Head];
+                var hand = b.Joints[JointType.HandRight];
+
+                SetpointXZ(this.headXZ, head);
+                SetpointXZ(this.heandXZ, hand);
+
+                SetpointZY(headZY, head);
+                SetpointZY(heand1ZY, hand);
+            }
+        }
+
+        private void SetpointXZ(UIElement el, Joint head)
+        {
+            Canvas.SetLeft(el, 195 + head.Position.X * 40);
+            Canvas.SetTop(el, 195 + head.Position.Z * 40);
+        }
+
+        private void SetpointZY(UIElement el, Joint head)
+        {
+            Canvas.SetLeft(el, 195 + head.Position.Z * 40);
+            Canvas.SetTop(el, 395 + head.Position.Y * -40);
         }
 
         #region For debbuging
@@ -68,52 +110,19 @@ namespace SWMS.WPF
         private void _jedi_ForceActivated(object sender, PointF point)
         {
             Out.Text = String.Format("Initial point: x={0:F2} y={1:F2}\n", point.X, point.Y);
-            Canvas.SetLeft(this.epoint, 200 + point.X * 10);
-            Canvas.SetTop(this.epoint, 200 + point.Y * 10);
+        }
+
+        private void _jedi_ForceApplying(object sender, PointF point)
+        {
+            Out.Text += String.Format("x={0:F2} y={1:F2}\n", point.X, point.Y);
+            Out.CaretIndex = Out.Text.Length;
+            // XZ
+            Canvas.SetLeft(this.epointXZ, 195 + point.X * 40);
+            Canvas.SetTop(this.epointXZ, 195 + point.Y * 40);
         }
 
 
         #endregion For debbuging
-
-        void _frameReader_MultiSourceFrameArrived(object sender, MultiSourceFrameArrivedEventArgs e)
-        {
-            _jedi.ProcessMove(sender, e);
-            Reader_ColorFrameArrived(sender, e);
-        }
-
-        private void Reader_ColorFrameArrived(object sender, MultiSourceFrameArrivedEventArgs e)
-        {
-            // ColorFrame is IDisposable
-            var mFrame = e.FrameReference.AcquireFrame();
-
-            using (ColorFrame colorFrame = mFrame.ColorFrameReference.AcquireFrame())
-            {
-                if (colorFrame != null)
-                {
-                    FrameDescription colorFrameDescription = colorFrame.FrameDescription;
-
-                    using (KinectBuffer colorBuffer = colorFrame.LockRawImageBuffer())
-                    {
-                        this._colorBitmap.Lock();
-
-                        // verify data and write the new color frame data to the display bitmap
-                        if ((colorFrameDescription.Width == this._colorBitmap.PixelWidth) && (colorFrameDescription.Height == this._colorBitmap.PixelHeight))
-                        {
-                            colorFrame.CopyConvertedFrameDataToIntPtr(
-                                this._colorBitmap.BackBuffer,
-                                (uint)(colorFrameDescription.Width * colorFrameDescription.Height * 4),
-                                ColorImageFormat.Bgra);
-
-                            this._colorBitmap.AddDirtyRect(new Int32Rect(0, 0, this._colorBitmap.PixelWidth, this._colorBitmap.PixelHeight));
-                        }
-
-                        this._colorBitmap.Unlock();
-                    }
-                }
-            }
-
-
-        }
 
         private KinectSensor _sensor;
         private MultiSourceFrameReader _frameReader;
