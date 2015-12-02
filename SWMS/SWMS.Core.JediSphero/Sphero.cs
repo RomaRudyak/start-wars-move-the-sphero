@@ -26,6 +26,13 @@ namespace SWMS.Core
         private double _currentX = 0;
         private double _currentY = 0;
 
+        public string Name
+        {
+            get
+            {
+                return _connection.BluetoothName;
+            }
+        }
         public double Friquency { get; private set; }
         public double Scale { get; private set; }
         public bool IsInitialized { get; private set; }
