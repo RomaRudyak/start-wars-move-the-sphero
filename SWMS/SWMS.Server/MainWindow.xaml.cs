@@ -139,7 +139,7 @@ namespace SWMS.Server
         private MultiSourceFrameReader _multiReader;
         private CoordinateMapper _coordinateMapper;
         private JediGestureRecognizer _jedi;
-        private Boolean _isJediInitialization = false;
+        private Boolean _isInitializationState = true;
 
         // TODO move this methods up in file
         private void ConnectToSheroButton_OnClick(object sender, RoutedEventArgs e)
@@ -176,15 +176,15 @@ namespace SWMS.Server
 
         private void JediForceDispel(object obj)
         {
-            _isJediInitialization = false;
+            _isInitializationState = false;
         }
 
         private void JediForceApplying(object arg1, PointF point)
         {
-            if (_isJediInitialization)
+            if (_isInitializationState)
 	        {
                 Device.SetConfigurePosition(point.X, point.Y);
-                _isJediInitialization = true;
+                _isInitializationState = false;
                 return;
             }
 
