@@ -138,7 +138,7 @@ namespace SWMS.Server
         private KinectSensor _sensor;
         private MultiSourceFrameReader _multiReader;
         private CoordinateMapper _coordinateMapper;
-        private Jedi _jedi;
+        private JediGestureRecognizer _jedi;
         private Boolean _isJediInitialization = false;
 
         // TODO move this methods up in file
@@ -168,7 +168,7 @@ namespace SWMS.Server
                 _jedi.Dispose();
                 _jedi = null;
             }
-            _jedi = new Jedi(_sensor);
+            _jedi = new JediGestureRecognizer(_sensor);
 
             _jedi.ForceApplying += JediForceApplying;
             _jedi.ForceDispel += JediForceDispel;

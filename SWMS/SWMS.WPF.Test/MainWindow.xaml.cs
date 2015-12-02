@@ -50,7 +50,7 @@ namespace SWMS.WPF.Test
             this._colorBitmap = new WriteableBitmap(colorFrameDescription.Width, colorFrameDescription.Height, 96.0, 96.0, PixelFormats.Bgr32, null);
 
 
-            _jedi = new Jedi(_sensor);
+            _jedi = new JediGestureRecognizer(_sensor);
             _jedi.ForceApplying += ForceApplying;
             _jedi.ForceDispel += ForceDispel;
 
@@ -119,7 +119,7 @@ namespace SWMS.WPF.Test
 
         private KinectSensor _sensor;
         private MultiSourceFrameReader _frameReader;
-        private Jedi _jedi;
+        private JediGestureRecognizer _jedi;
         public WriteableBitmap _colorBitmap;
 
     }

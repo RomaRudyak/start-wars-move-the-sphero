@@ -65,7 +65,7 @@
     <Compile Include="Extentions\ActionExtentions.cs" />
     <Compile Include="Extentions\CameraSpacePositionExtentions.cs" />
     <Compile Include="Helpers\CoordinatHelper.cs" />
-    <Compile Include="Jedi.cs" />
+    <Compile Include="JediGestureRecognizer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

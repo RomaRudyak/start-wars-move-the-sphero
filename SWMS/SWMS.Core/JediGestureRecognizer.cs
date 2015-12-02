@@ -10,7 +10,7 @@ using System.Diagnostics;
 
 namespace SWMS.Core
 {
-    public class Jedi : IDisposable
+    public class JediGestureRecognizer : IDisposable
     {
         /// <summary>
         /// Fires when Jedi moving something with force
@@ -27,14 +27,14 @@ namespace SWMS.Core
             Dispose(true);
         }
 
-        public Jedi(KinectSensor sensor)
+        public JediGestureRecognizer(KinectSensor sensor)
         {
             _sensor = sensor;
             _reader = sensor.OpenMultiSourceFrameReader(FrameSourceTypes.Body | FrameSourceTypes.Depth);
             _reader.MultiSourceFrameArrived += ProcessMove;
         }
 
-        ~Jedi()
+        ~JediGestureRecognizer()
         {
             Dispose(false);
             GC.SuppressFinalize(this);
