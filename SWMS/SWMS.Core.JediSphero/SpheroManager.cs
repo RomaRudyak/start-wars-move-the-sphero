@@ -7,7 +7,7 @@ namespace SWMS.Core
 {
     public class SpheroManager
     {
-        public static async Task<Sphero> GetSpheroAsync()
+        public static async Task<JediSphero> GetSpheroAsync()
         {
             IEnumerable<SpheroInformation> spheros = await SpheroConnectionProvider.DiscoverSpheros();
             SpheroInformation spheroInfo = spheros.FirstOrDefault();
@@ -23,7 +23,7 @@ namespace SWMS.Core
             {
                 return null;
             }
-            var spheroDevice = new Sphero(connection);
+            var spheroDevice = new JediSphero(connection);
             return spheroDevice;
         }
     }
