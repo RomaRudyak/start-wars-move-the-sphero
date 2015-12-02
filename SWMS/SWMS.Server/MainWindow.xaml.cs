@@ -44,6 +44,8 @@ namespace SWMS.Server
 
             _multiReader.MultiSourceFrameArrived += FrameArrived;
 
+            _sensor.Open();
+
             UpdateKinectStaus(_sensor.IsAvailable);
         }
 

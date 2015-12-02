@@ -42,6 +42,7 @@
             <StackPanel
                 Grid.Column="1"
                 Grid.Row="1"
+                
                 >
                 
                 <TextBlock
@@ -72,6 +73,10 @@
                     TickPlacement="Both"
                     />
 
+                <Button
+                    Content="Configured"
+                    />
+                
             </StackPanel>
             
         </Grid>
