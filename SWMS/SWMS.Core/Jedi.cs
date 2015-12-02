@@ -46,7 +46,7 @@ namespace SWMS.Core
             {
                 _reader.MultiSourceFrameArrived -= ProcessMove;
                 _reader.Dispose();
-                _reader = null
+                _reader = null;
             }
         }
 
