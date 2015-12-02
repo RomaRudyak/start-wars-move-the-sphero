@@ -122,10 +122,6 @@ namespace SWMS.Core
 
                 Debug.WriteLine("Forse tracked: {0} Frame: {1}", _handTrackedCount, _frameCount);
             }
-            else
-            {
-                //Debug.WriteLine("Forse not tracked");
-            }
 
 
             if (CanFireForesMove())
