@@ -1,6 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30723.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SWMS.Core", "SWMS.Core\SWMS.Core.csproj", "{5C5B5864-84A4-43C0-ABEE-F689708CA77E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{06A65A8E-E51A-4D9D-9C14-0D6869376019}"
@@ -10,7 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{06A65A
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SWMS.WPF", "SWMS.WPF\SWMS.WPF.csproj", "{71CB1909-9EC3-4409-9D71-AE733AF8DBBC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SWMS.WPF.Test", "SWMS.WPF\SWMS.WPF.Test.csproj", "{71CB1909-9EC3-4409-9D71-AE733AF8DBBC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
