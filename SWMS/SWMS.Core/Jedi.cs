@@ -10,7 +10,7 @@ using System.Diagnostics;
 
 namespace SWMS.Core
 {
-    public class Jedi
+    public class Jedi : IDisposable
     {
         /// <summary>
         /// Fires when Jedi moving something with force
@@ -22,7 +22,36 @@ namespace SWMS.Core
         /// </summary>
         public event Action<Object> ForceDispel;
 
-        public void ProcessMove(object sender, MultiSourceFrameArrivedEventArgs e)
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+
+        public Jedi(MultiSourceFrameReader reader)
+        {
+            _reader = sensor;
+            _reader.MultiSourceFrameArrived += ProcessMove;
+        }
+
+        ~Jedi()
+        {
+            Dispose(false);
+            GC.SuppressFinalize(this);
+        }
+
+        
+        protected virtual void Dispose(Boolean dispossing)
+        {
+            if (dispossing)
+            {
+                _reader.MultiSourceFrameArrived -= ProcessMove;
+                _reader.Dispose();
+                _reader = null
+            }
+        }
+
+
+        private void ProcessMove(object sender, MultiSourceFrameArrivedEventArgs e)
         {
             unchecked { _frameCount++; }
             Body[] bodys = null;
@@ -150,5 +179,6 @@ namespace SWMS.Core
         private Int32 _handTrackedCount = 0;
         private Int32 _headTrackedCount = 0;
         private static readonly HandState InitialHandState = HandState.Open;
+        private MultiSourceFrameReader _reader;
     }
 }

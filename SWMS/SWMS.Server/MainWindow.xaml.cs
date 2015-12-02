@@ -126,6 +126,11 @@ namespace SWMS.Server
                 _sensor.Close();
                 _sensor = null;
             }
+            if (_jedi != null)
+            {
+                _jedi.Dispose();
+                _jedi = null;
+            }
         }
 
         private WriteableBitmap _colorBitmap;
@@ -135,6 +140,7 @@ namespace SWMS.Server
         private Jedi _jedi;
         private Boolean _isJediInitialization = false;
 
+        // TODO move this methods up in file
         private void ConnectToSheroButton_OnClick(object sender, RoutedEventArgs e)
         {
             GetSphero();
@@ -148,8 +154,7 @@ namespace SWMS.Server
             }
 
             Device.EndConfigure();
-            _jedi = new Jedi();
-            _multiReader.MultiSourceFrameArrived += _jedi.ProcessMove;
+            _jedi = new Jedi(_multiReader);
 
             _jedi.ForceApplying += JediForceApplying;
             _jedi.ForceDispel += JediForceDispel;
