@@ -94,7 +94,7 @@ namespace SWMS.Core
             }
             else
             {
-                Debug.WriteLine("Forse not tracked");
+                //Debug.WriteLine("Forse not tracked");
             }
 
 
@@ -127,8 +127,8 @@ namespace SWMS.Core
 
         private Boolean CanFireForesMove()
         {
-            // 1/6 sec
-            var machNum = 4;
+            // 1/2 sec
+            var machNum = 15;
             return _frameCount % machNum == 0 && _handTrackedCount == machNum;
         }
 
