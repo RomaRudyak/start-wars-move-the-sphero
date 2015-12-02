@@ -53,6 +53,7 @@ namespace SWMS.Server
             UpdateKinectStaus(_sensor.IsAvailable);
         }
 
+        // TODO create batter notification
         private async void GetSphero()
         {
             if (Device != null)
@@ -154,7 +155,17 @@ namespace SWMS.Server
             }
 
             Device.EndConfigure();
-            _jedi = new Jedi(_multiReader);
+            InitializeJedi();
+        }
+
+        private void InitializeJedi()
+        {
+            if (_jedi != null)
+            {
+                _jedi.Dispose();
+                _jedi = null;
+            }
+            _jedi = new Jedi(_sensor);
 
             _jedi.ForceApplying += JediForceApplying;
             _jedi.ForceDispel += JediForceDispel;

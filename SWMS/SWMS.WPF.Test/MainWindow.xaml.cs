@@ -50,7 +50,7 @@ namespace SWMS.WPF.Test
             this._colorBitmap = new WriteableBitmap(colorFrameDescription.Width, colorFrameDescription.Height, 96.0, 96.0, PixelFormats.Bgr32, null);
 
 
-            _jedi = new Jedi();
+            _jedi = new Jedi(_sensor);
             _jedi.ForceApplying += ForceApplying;
             _jedi.ForceDispel += ForceDispel;
 
@@ -66,7 +66,6 @@ namespace SWMS.WPF.Test
 
         private void MultiSourceFrameArrived(object sender, MultiSourceFrameArrivedEventArgs e)
         {
-            _jedi.ProcessMove(sender, e);
             using (var bodyFrame = e.FrameReference.AcquireFrame().BodyFrameReference.AcquireFrame())
             {
                 var bodys = new Body[6];

@@ -27,9 +27,10 @@ namespace SWMS.Core
             Dispose(true);
         }
 
-        public Jedi(MultiSourceFrameReader reader)
+        public Jedi(KinectSensor sensor)
         {
-            _reader = reader;
+            _sensor = sensor;
+            _reader = sensor.OpenMultiSourceFrameReader(FrameSourceTypes.Body | FrameSourceTypes.Depth);
             _reader.MultiSourceFrameArrived += ProcessMove;
         }
 
@@ -180,5 +181,6 @@ namespace SWMS.Core
         private Int32 _headTrackedCount = 0;
         private static readonly HandState InitialHandState = HandState.Open;
         private MultiSourceFrameReader _reader;
+        private KinectSensor _sensor;
     }
 }
