@@ -77,7 +77,6 @@ namespace SWMS.Core
             }
             else
             {
-                //ResetTrackingCounters();
                 return;
             }
 
@@ -95,9 +94,9 @@ namespace SWMS.Core
 
             Debug.WriteLine("Hand tracked: {0} Frame: {1}", _handTrackedCount, _frameCount);
 
-            
-            
-            if (_frameCount % 7 == 0 && _handTrackedCount >= 7)
+
+
+            if (CanFireForeMove())
             {
                 var handPosition = _lastHandPosition;
                 var headPosition = _lastHeadPosition;
@@ -115,6 +114,11 @@ namespace SWMS.Core
             
         }
 
+        private bool CanFireForeMove()
+        {
+            return _frameCount % 7 == 0 && _handTrackedCount >= 7;
+        }
+
         private void ResetTrackingCounters(int reset = 0)
         {
             _handTrackedCount = reset;
@@ -124,7 +128,7 @@ namespace SWMS.Core
 
         private Boolean IsHandInInitialGesture(HandState handState, TrackingConfidence trackingCondition)
         {
-            return handState == InitialHandState;// && trackingCondition == TrackingConfidence.High;
+            return handState == InitialHandState;
         }
 
         private Int32 _frameCount;

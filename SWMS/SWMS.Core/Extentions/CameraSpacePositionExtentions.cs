@@ -29,11 +29,6 @@ namespace SWMS.Core.Extentions
             return new PointF { X = point.X, Y = point.Z };
         }
 
-        //public static PointF GetProectionForXY(this CameraSpacePoint point)
-        //{
-        //    return new PointF { X = point.X, Y = point.Y };
-        //}
-
         public static CameraSpacePoint GetAccumulatedAvarage(this CameraSpacePoint lastAnchor, CameraSpacePoint newPosition, ref Int32 count)
         {
             var result = new CameraSpacePoint();
