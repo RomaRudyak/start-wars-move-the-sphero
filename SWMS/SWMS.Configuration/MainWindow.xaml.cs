@@ -16,7 +16,7 @@ using System.Windows.Shapes;
 using SWMS.Core;
 using System.Diagnostics;
 
-namespace SWMS.Server
+namespace SWMS.Configuration
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
