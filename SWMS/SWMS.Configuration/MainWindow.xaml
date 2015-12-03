@@ -23,7 +23,7 @@
                 Grid.Column="0"
                 Orientation="Horizontal">
                 <Image 
-                    Source="/SWMS.Server;component/Images/Status.png" 
+                    Source="Images/kinect.png" 
                     VerticalAlignment="Center"/>
                 <Label 
                     x:Name="KinectStatus"
@@ -41,13 +41,16 @@
 
             <StackPanel
                 Grid.Column="1"
-                Grid.Row="0">
-            
-                <Button 
-                    Content="Connect to Sphero" 
-                    Click="ConnectToSheroButton_OnClick"/>
+                Grid.Row="0"
+                Orientation="Horizontal">
+                <Image 
+                    Source="Images/sphero.jpg" 
+                    VerticalAlignment="Center"/>
+                
                 <Label 
-                    x:Name="SpheroName" />
+                    x:Name="SpheroName" 
+                    VerticalAlignment="Center"
+                    Content="Connectring..."/>
 
             </StackPanel>
 
@@ -64,7 +67,7 @@
 
                 <Slider
                     x:Name="SpheroAngle"
-                    Minimum="-360"
+                    Minimum="0"
                     Maximum="360"
                     Value="0"
                     IsSnapToTickEnabled="True"
@@ -81,11 +84,13 @@
                     x:Name="SpheroSpeed"
                     Minimum="0"
                     Maximum="255"
-                    Value="60"
+                    Value="105"
+                    IsSnapToTickEnabled="True"
                     TickFrequency="1"
                     TickPlacement="Both"
                     />
-                <Button Content="Configured" Click="ConfiguredButton_OnClick"/>
+                <Button Content="Begin Configuration" Click="BeginConfigurationButton_OnClick"/>
+                <Button Content="End Configuration" Click="ConfiguredButton_OnClick"/>
             </StackPanel>
 
         </Grid>
