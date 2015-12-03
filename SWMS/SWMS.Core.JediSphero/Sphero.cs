@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Sphero.Communication;
 using Sphero.Devices;
 
-namespace SWMS.Core
+namespace SWMS.Core.JediSphero
 {
     public class Sphero : SpheroDevice, INotifyPropertyChanged
     {

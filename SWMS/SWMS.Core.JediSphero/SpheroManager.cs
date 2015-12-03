@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Sphero.Communication;
 
-namespace SWMS.Core
+namespace SWMS.Core.JediSphero
 {
     public class SpheroManager
     {

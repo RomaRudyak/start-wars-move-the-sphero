@@ -153,9 +153,7 @@ namespace SWMS.Core
 
         private Boolean CanFireForesMove()
         {
-            // 1/2 sec
-            var machNum = 15;
-            return _frameCount % machNum == 0 && _handTrackedCount == machNum;
+            return _frameCount % Frequency == 0 && _handTrackedCount == Frequency;
         }
 
         private void ResetTrackingCounters(int reset = 0)
@@ -178,5 +176,6 @@ namespace SWMS.Core
         private static readonly HandState InitialHandState = HandState.Open;
         private MultiSourceFrameReader _reader;
         private KinectSensor _sensor;
+        private readonly int Frequency = 4;
     }
 }
