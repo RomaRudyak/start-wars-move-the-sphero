@@ -14,7 +14,9 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using SWMS.Core;
+using SWMS.Core.JediSphero;
 using System.Diagnostics;
+using SWMS.Core.Helpers;
 
 namespace SWMS.Configuration
 {
@@ -30,7 +32,7 @@ namespace SWMS.Configuration
             this.Closed += MainWindow_Closed;
         }
 
-        public SWMS.Core.Sphero Device { get; set; }
+        public JediSphero Device { get; set; }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
@@ -51,26 +53,30 @@ namespace SWMS.Configuration
             _sensor.Open();
 
             UpdateKinectStaus(_sensor.IsAvailable);
+
+            GetSphero();
         }
 
-        // TODO create batter notification
-        private async void GetSphero()
+        private void GetSphero()
         {
             if (Device != null)
             {
-                MessageBox.Show("Sphero already connected");
                 return;
             }
 
-            Device = await SpheroManager.GetSpheroAsync();
-            if (Device == null)
+            Task.Factory.StartNew(async () =>
             {
-                MessageBox.Show("Sphero not found");
-                return;
-            }
-            SpheroName.Content = String.Format("Connected: {0}", Device.Name);
-
-            Device.BeginConfigure();
+                while (Device == null)
+                {
+                    Device = await SpheroManager.GetSpheroAsync();
+                    if (Device == null)
+                    {
+                        await Task.Delay(1000);
+                        continue;
+                    }
+                    Dispatcher.Invoke(() => SpheroName.Content = String.Format("Connected: {0}", Device.Name));
+                }
+            });
         }
 
         private void FrameArrived(object sender, MultiSourceFrameArrivedEventArgs e)
@@ -117,6 +123,10 @@ namespace SWMS.Configuration
 
         private void MainWindow_Closed(object sender, EventArgs e)
         {
+            if (Device != null)
+            {
+                // TODO disconnect sphero
+            }
             if (_multiReader != null)
             {
                 _multiReader.Dispose();
@@ -134,17 +144,15 @@ namespace SWMS.Configuration
             }
         }
 
-        private WriteableBitmap _colorBitmap;
-        private KinectSensor _sensor;
-        private MultiSourceFrameReader _multiReader;
-        private CoordinateMapper _coordinateMapper;
-        private JediGestureRecognizer _jedi;
-        private Boolean _isInitializationState = true;
-
-        // TODO move this methods up in file
-        private void ConnectToSheroButton_OnClick(object sender, RoutedEventArgs e)
+        private void BeginConfigurationButton_OnClick(object sender, RoutedEventArgs e)
         {
-            GetSphero();
+            if (Device == null)
+            {
+                return;
+            }
+
+            Device.BeginConfigure();
+            Device.SetConfigureAngle(0);
         }
 
         private void ConfiguredButton_OnClick(object sender, RoutedEventArgs e)
@@ -156,7 +164,7 @@ namespace SWMS.Configuration
 
             double newValue = this.SpheroSpeed.Value / 255;
             Debug.WriteLine("Speed scale value: {0}", newValue);
-            Device.ChangeSpeedScale(newValue);
+            Device.SetSpeedScale(newValue);
             Device.EndConfigure();
             InitializeJedi();
         }
@@ -182,13 +190,18 @@ namespace SWMS.Configuration
         private void JediForceApplying(object arg1, PointF point)
         {
             if (_isInitializationState)
-	        {
-                Device.SetConfigurePosition(point.X, point.Y);
+            {
+                Device.SetConfigurePosition(point.X, -point.Y);
+                _lastPoint = point;
                 _isInitializationState = false;
                 return;
             }
 
-            Device.MoveTo(point.X*5, point.Y*5);
+            if (CoordinateHelper.GetDistance(_lastPoint, point) >= 0.05F)
+            {
+                Device.MoveTo(point.X, -point.Y);
+            }
+            _lastPoint = point;
         }
 
         private void SpheroAngle_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -201,5 +214,13 @@ namespace SWMS.Configuration
             Debug.WriteLine("Speed angle value: {0}", angleValue);
             Device.SetConfigureAngle((int)angleValue);
         }
+
+        private PointF _lastPoint;
+        private WriteableBitmap _colorBitmap;
+        private KinectSensor _sensor;
+        private MultiSourceFrameReader _multiReader;
+        private CoordinateMapper _coordinateMapper;
+        private JediGestureRecognizer _jedi;
+        private Boolean _isInitializationState = true;
     }
 }
