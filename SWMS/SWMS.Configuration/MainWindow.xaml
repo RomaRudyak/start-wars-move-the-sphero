@@ -1,7 +1,9 @@
 ﻿<Window x:Class="SWMS.Configuration.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="MainWindow">
+        Title="MainWindow" 
+        
+        >
     <Window.Resources>
 
     </Window.Resources>
@@ -9,7 +11,7 @@
         BorderThickness="10">
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="2*"/>
+                <ColumnDefinition/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
@@ -55,18 +57,20 @@
             </StackPanel>
 
 
-            <StackPanel
+            <DockPanel
                 Grid.Column="1"
                 Grid.Row="1"
-                
+                LastChildFill="True"
                 >
 
                 <TextBlock
+                    DockPanel.Dock="Top"
                     Text="{Binding ElementName=SpheroAngle, Path=Value, StringFormat={}Angle: {0}, UpdateSourceTrigger=PropertyChanged}"
                     />
 
                 <Slider
                     x:Name="SpheroAngle"
+                    DockPanel.Dock="Top"
                     Minimum="0"
                     Maximum="360"
                     Value="0"
@@ -77,10 +81,12 @@
                     />
 
                 <TextBlock
+                    DockPanel.Dock="Top"
                     Text="{Binding ElementName=SpheroSpeed, Path=Value, StringFormat={}Speed: {0}, UpdateSourceTrigger=PropertyChanged}"
                     />
 
                 <Slider
+                    DockPanel.Dock="Top"
                     x:Name="SpheroSpeed"
                     Minimum="0"
                     Maximum="255"
@@ -89,9 +95,35 @@
                     TickFrequency="1"
                     TickPlacement="Both"
                     />
-                <Button Content="Begin Configuration" Click="BeginConfigurationButton_OnClick"/>
-                <Button Content="End Configuration" Click="ConfiguredButton_OnClick"/>
-            </StackPanel>
+                <Button 
+                    DockPanel.Dock="Top"
+                    Content="Begin Configuration" 
+                    Click="BeginConfigurationButton_OnClick"/>
+                <Button 
+                    DockPanel.Dock="Top"
+                    Content="End Configuration" 
+                    Click="ConfiguredButton_OnClick"/>
+                <DockPanel
+                    VerticalAlignment="Stretch"
+                    >
+                    <Canvas 
+                        Height="300"
+                        Width="300"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center">
+                        <Label Content="XY" />
+                        <Label Content="X" Canvas.Left="0" Canvas.Top="120" />
+                        <Label Content="Y" Canvas.Left="120" Canvas.Top="0" />
+                        <Line X1="0" Y1="150" X2="300" Y2="150" Stroke="Black"/>
+                        <Line X1="150" Y1="0" X2="150" Y2="300" Stroke="Black"/>
+                        <Ellipse x:Name="ProectionPoint" Height="10" Width="10" Fill="Red" Canvas.Left="145" Canvas.Top="145"/>
+                        <Ellipse x:Name="SpheroPoint" Height="10" Width="10" Fill="Gray" Canvas.Left="145" Canvas.Top="145"/>
+                        <Ellipse x:Name="ProectionHead" Height="10" Width="10" Fill="Blue" Canvas.Left="145" Canvas.Top="145"/>
+                        <Ellipse x:Name="ProectionHandRight" Height="10" Width="10" Fill="Green" Canvas.Left="145" Canvas.Top="145"/>
+                        <Ellipse x:Name="ProectionHandLeft" Height="10" Width="10" Fill="Green" Canvas.Left="145" Canvas.Top="145"/>
+                    </Canvas>
+                </DockPanel>
+            </DockPanel>
 
         </Grid>
     </Border>

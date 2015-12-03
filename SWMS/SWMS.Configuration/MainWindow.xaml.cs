@@ -82,6 +82,52 @@ namespace SWMS.Configuration
         private void FrameArrived(object sender, MultiSourceFrameArrivedEventArgs e)
         {
             var multiframe = e.FrameReference.AcquireFrame();
+            DrawCameraView(multiframe);
+            HandBodyPartsOnGrid(multiframe);
+        }
+
+        private void HandBodyPartsOnGrid(MultiSourceFrame multiframe)
+        {
+            using (var bodyFrame = multiframe.BodyFrameReference.AcquireFrame())
+            {
+                if (bodyFrame == null)
+                {
+                    return;
+                }
+
+                var bodies = new Body[bodyFrame.BodyCount];
+                bodyFrame.GetAndRefreshBodyData(bodies);
+
+                var body = bodies.FirstOrDefault(b => b.IsTracked);
+                if (body == null)
+                {
+                    return;
+                }
+
+                var posHead = body.Joints[JointType.Head].Position;
+                var posHandRight = body.Joints[JointType.HandRight].Position;
+                var posHandLeft = body.Joints[JointType.HandLeft].Position;
+
+                SetPosition(ProectionHead, posHead.X, posHead.Z);
+                SetPosition(ProectionHandRight, posHandRight.X, posHandRight.Z);
+                SetPosition(ProectionHandLeft, posHandLeft.X, posHandLeft.Z);
+                if (Device != null)
+                {
+                    SetPosition(SpheroPoint, Device.CurrentX, -Device.CurrentY);
+                }
+            }
+        }
+
+        private void SetPosition(UIElement obj, Double x, Double y)
+        {
+            var scale = 30;
+            var offset = 145;
+            Canvas.SetLeft(obj, offset + x * scale);
+            Canvas.SetTop(obj, offset + y * scale);
+        }
+
+        private void DrawCameraView(MultiSourceFrame multiframe)
+        {
             using (ColorFrame colorFrame = multiframe.ColorFrameReference.AcquireFrame())
             {
                 if (colorFrame != null)
@@ -185,14 +231,16 @@ namespace SWMS.Configuration
 
         private void JediForceDispel(object obj)
         {
-            //_isInitializationState = false;
         }
 
         private void JediForceApplying(object arg1, PointF point)
         {
+            // For reversing matrix
+            point.Y = -point.Y;
+
             if (_isInitializationState)
             {
-                Device.SetConfigurePosition(point.X, -point.Y);
+                Device.SetConfigurePosition(point.X, point.Y);
                 _lastPoint = point;
                 _isInitializationState = false;
                 return;
@@ -200,8 +248,10 @@ namespace SWMS.Configuration
             
             if (CoordinateHelper.GetDistance(_lastPoint, point) >= 0.05F)
             {
-                Device.MoveTo(point.X, -point.Y);
+                Device.MoveTo(point.X, point.Y);
             }
+            
+            SetPosition(ProectionPoint, point.X, -point.Y);
             _lastPoint = point;
         }
 
