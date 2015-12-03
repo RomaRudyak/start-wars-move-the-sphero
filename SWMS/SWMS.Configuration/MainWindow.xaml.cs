@@ -231,6 +231,7 @@ namespace SWMS.Configuration
 
         private void JediForceDispel(object obj)
         {
+            _isInitializationState = true;
         }
 
         private void JediForceApplying(object arg1, PointF point)
@@ -246,7 +247,7 @@ namespace SWMS.Configuration
                 return;
             } 
             
-            if (CoordinateHelper.GetDistance(_lastPoint, point) >= 0.05F)
+            if (CoordinateHelper.GetDistance(_lastPoint, point) >= 0.04F)
             {
                 Device.MoveTo(point.X, point.Y);
             }
@@ -266,6 +267,7 @@ namespace SWMS.Configuration
             Device.SetConfigureAngle((int)angleValue);
         }
 
+        private const double gridScaleColef = 1;//0.7;
         private PointF _lastPoint;
         private WriteableBitmap _colorBitmap;
         private KinectSensor _sensor;
