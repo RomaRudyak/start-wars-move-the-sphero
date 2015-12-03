@@ -180,11 +180,12 @@ namespace SWMS.Configuration
 
             _jedi.ForceApplying += JediForceApplying;
             _jedi.ForceDispel += JediForceDispel;
+            _isInitializationState = true;
         }
 
         private void JediForceDispel(object obj)
         {
-            _isInitializationState = false;
+            //_isInitializationState = false;
         }
 
         private void JediForceApplying(object arg1, PointF point)
@@ -195,8 +196,8 @@ namespace SWMS.Configuration
                 _lastPoint = point;
                 _isInitializationState = false;
                 return;
-            }
-
+            } 
+            
             if (CoordinateHelper.GetDistance(_lastPoint, point) >= 0.05F)
             {
                 Device.MoveTo(point.X, -point.Y);
