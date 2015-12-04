@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="MainWindow" Height="800" Width="800"
          x:Name="Window">
-    <Grid KeyDown="Window_OnKeyDown">
+    <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="10"/>
             <ColumnDefinition/>
@@ -26,8 +26,10 @@
             </Grid.RowDefinitions>
             <Grid Height="500" Width="500" Margin="10" Background="Aquamarine" x:Name="SpheroPositionGrid" MouseDown="SpheroPositionGrid_OnMouseDown" MouseMove="SpheroPositionGrid_OnMouseMove" MouseUp="SpheroPositionGrid_OnMouseUp">
                 <Canvas x:Name="SpheroCanvas">
-                    <Ellipse Canvas.Top="10" Fill="Black" x:Name="SpheroEllipse" Width="10" Height="10"></Ellipse>
-                    <Ellipse Canvas.Top="10" Fill="Red" x:Name="MousePointEllipse" Width="10" Height="10"></Ellipse>
+                    <Ellipse Canvas.Top="0" Fill="Black" x:Name="CurrentPoint" Width="10" Height="10"></Ellipse>
+                    <Ellipse Canvas.Top="0" Fill="Red" x:Name="MousePointEllipse" Width="10" Height="10"></Ellipse>
+                    <Ellipse Canvas.Top="0" Fill="Purple" x:Name="DestinationPoint" Width="10" Height="10"></Ellipse>
+                    <Ellipse Canvas.Top="0" Fill="Gray" x:Name="NextPoint" Width="10" Height="10"></Ellipse>
                 </Canvas>
             </Grid>
             <Grid Grid.Row="1">

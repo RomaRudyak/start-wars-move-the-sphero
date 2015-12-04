@@ -6,9 +6,9 @@ using Timer = System.Timers.Timer;
 
 namespace SWMS.Core.JediSphero
 {
-    public class JediSphero : SpheroDevice
+    public class _JediSphero : SpheroDevice
     {
-        public JediSphero(SpheroConnection connection)
+        public _JediSphero(SpheroConnection connection)
             : base(connection)
         {
             _connection = connection;
@@ -58,8 +58,6 @@ namespace SWMS.Core.JediSphero
         {
             SetRGBLED(255, 0, 0);
             SetBackLED(255);
-            IsInitialized = false;
-            ResetState();
         }
 
         public void SetConfigurePosition(double x, double y)
@@ -85,7 +83,7 @@ namespace SWMS.Core.JediSphero
         {
             SetHeading(_configAngle);
             SetRGBLED(0, 127, 0);
-            //SetBackLED(0);
+            SetBackLED(0);
             IsInitialized = true;
         }
 
@@ -119,6 +117,8 @@ namespace SWMS.Core.JediSphero
             SetTempDeltaXY(x, y);
             Roll(angle, spheroSpeed, time);
         }
+
+
 
         public void Roll(double angle, double speed, double miliseconds)
         {
@@ -184,15 +184,6 @@ namespace SWMS.Core.JediSphero
             CurrentX += _tempdX;
             CurrentY += _tempdY;
         }
-
-        private void ResetState()
-        {
-            Scale = 0D;
-            IsMoving = false;
-            SetConfigurePosition(0d, 0d);
-            SetTempDeltaXY(0d, 0d);
-        }
-
 
         private const double MAX_SPEED = 2.0;
 
