@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using SWMS.Core;
+using SWMS.Core.JediSphero;
 
 namespace SWMS.WPF.JediSpheroTest
 {
@@ -61,95 +62,7 @@ namespace SWMS.WPF.JediSpheroTest
             Task.Run(() => SearchSphero());
         }
 
-        #region Colors
-
-        private void RedButton_OnClick(object sender, RoutedEventArgs e)
-        {
-            if (_device == null)
-            {
-                return;
-            }
-
-            _device.SetRGBLED(255, 0, 0);
-        }
-
-        private void GreenButton_OnClick(object sender, RoutedEventArgs e)
-        {
-            if (_device == null)
-            {
-                return;
-            }
-            _device.SetRGBLED(0, 255, 0);
-        }
-
-        private void BlueButton_OnClick(object sender, RoutedEventArgs e)
-        {
-            if (_device == null)
-            {
-                return;
-            }
-            _device.SetRGBLED(0, 0, 255);
-        }
-
-        #endregion
-
         private int oldAngle;
-
-        private void Window_OnKeyDown(object sender, KeyEventArgs e)
-        {
-            return;
-
-            //if (_device == null)
-            //{
-            //    return;
-            //}
-
-            //int angle = 0;
-            //bool async = false;
-
-            //switch (e.Key)
-            //{
-            //    case Key.W:
-            //        angle = 0;
-            //        break;
-
-            //    case Key.D:
-            //        angle = 90;
-            //        break;
-
-            //    case Key.S:
-            //        angle = 180;
-            //        break;
-
-            //    case Key.A:
-            //        angle = 270;
-            //        break;
-
-            //    case Key.D8:
-            //        angle = 0;
-            //        async = true;
-            //        break;
-
-            //    case Key.D6:
-            //        angle = 90;
-            //        async = true;
-            //        break;
-
-            //    case Key.D5:
-            //        angle = 180;
-            //        async = true;
-            //        break;
-
-            //    case Key.D4:
-            //        angle = 270;
-            //        async = true;
-            //        break;
-            //    default:
-            //        return;
-            //}
-
-            //_device.Roll(angle, 0.5F);
-        }
 
         private void SpheroPositionGrid_OnMouseUp(object sender, MouseButtonEventArgs e)
         {
@@ -177,18 +90,29 @@ namespace SWMS.WPF.JediSpheroTest
 
             if (!_device.IsInitialized)
             {
-                _device.SetConfigurePosition(MousePositionX / scale, MousePositionY / scale);
+                _device.SetPosition(MousePositionX / scale, MousePositionY / scale);
                 SpheroPositionX = _device.CurrentX * scale;
                 SpheroPositionY = _device.CurrentY * scale;
-                Canvas.SetLeft(SpheroEllipse, MousePositionX);
-                Canvas.SetTop(SpheroEllipse, MousePositionY);
+                Canvas.SetLeft(CurrentPoint, MousePositionX);
+                Canvas.SetTop(CurrentPoint, MousePositionY);
             }
             else
             {
-                Canvas.SetLeft(SpheroEllipse, _device.CurrentX * scale);
-                Canvas.SetTop(SpheroEllipse, _device.CurrentY * scale);
+                var currentPoint = _device.CurrentPoint;
+                var nextPoint = _device.GetNextPoint();
+                var destinationPoint = _device.GetDestinationPosition();
 
+                Canvas.SetLeft(CurrentPoint, currentPoint.X * scale);
+                Canvas.SetTop(CurrentPoint, currentPoint.Y * scale);
+
+                Canvas.SetLeft(NextPoint, nextPoint.X * scale);
+                Canvas.SetTop(NextPoint, nextPoint.Y * scale);
+
+                Canvas.SetLeft(DestinationPoint, destinationPoint.X * scale);
+                Canvas.SetTop(DestinationPoint, destinationPoint.Y * scale);
+                
                 _device.MoveTo(MousePositionX / scale, MousePositionY / scale);
+
                 Canvas.SetLeft(MousePointEllipse, MousePositionX);
                 Canvas.SetTop(MousePointEllipse, MousePositionY);
             }
@@ -203,7 +127,7 @@ namespace SWMS.WPF.JediSpheroTest
         {
             if (_device != null)
             {
-                _device.BeginConfigure();
+                _device.BeginConfiguration();
             }
         }
 
@@ -213,7 +137,7 @@ namespace SWMS.WPF.JediSpheroTest
             if (_device != null)
             {
                 int angle = (int)e.NewValue;
-                _device.SetConfigureAngle(angle);
+                _device.SetConfigurationAngle(angle);
             }
         }
 
@@ -231,7 +155,7 @@ namespace SWMS.WPF.JediSpheroTest
         {
             if (_device != null)
             {
-                _device.EndConfigure();
+                _device.EndConfiguration();
             }
         }
 
