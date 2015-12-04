@@ -120,10 +120,14 @@ namespace SWMS.Configuration
 
         private void SetPosition(UIElement obj, Double x, Double y)
         {
+            var smt =  Scene.LayoutTransform;
+            var p = smt.Transform(new Point(x, y));
             var scale = 30;
             var offset = 145;
-            Canvas.SetLeft(obj, offset + x * scale);
-            Canvas.SetTop(obj, offset + y * scale);
+            Canvas.SetLeft(obj, p.X);
+            Canvas.SetTop(obj, p.Y);
+            //Canvas.SetLeft(obj, offset + x * scale);
+            //Canvas.SetTop(obj, offset + y * scale);
         }
 
         private void DrawCameraView(MultiSourceFrame multiframe)

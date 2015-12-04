@@ -106,21 +106,51 @@
                 <DockPanel
                     VerticalAlignment="Stretch"
                     >
-                    <Canvas 
-                        Height="300"
-                        Width="300"
+                    <Canvas
+                        x:Name="Scene"
+                        Height="32"
+                        Width="32"
                         VerticalAlignment="Center"
                         HorizontalAlignment="Center">
-                        <Label Content="XY" />
-                        <Label Content="X" Canvas.Left="0" Canvas.Top="120" />
-                        <Label Content="Y" Canvas.Left="120" Canvas.Top="0" />
-                        <Line X1="0" Y1="150" X2="300" Y2="150" Stroke="Black"/>
-                        <Line X1="150" Y1="0" X2="150" Y2="300" Stroke="Black"/>
-                        <Ellipse x:Name="ProectionPoint" Height="10" Width="10" Fill="Red" Canvas.Left="145" Canvas.Top="145"/>
-                        <Ellipse x:Name="SpheroPoint" Height="10" Width="10" Fill="Gray" Canvas.Left="145" Canvas.Top="145"/>
-                        <Ellipse x:Name="ProectionHead" Height="10" Width="10" Fill="Blue" Canvas.Left="145" Canvas.Top="145"/>
-                        <Ellipse x:Name="ProectionHandRight" Height="10" Width="10" Fill="Green" Canvas.Left="145" Canvas.Top="145"/>
-                        <Ellipse x:Name="ProectionHandLeft" Height="10" Width="10" Fill="Green" Canvas.Left="145" Canvas.Top="145"/>
+                        
+                        <Canvas.LayoutTransform>
+                            <ScaleTransform 
+                                CenterX="16"
+                                CenterY="16"
+                                ScaleX="8"
+                                ScaleY="8"
+                                >
+                                
+                            </ScaleTransform>
+                        </Canvas.LayoutTransform>
+                        
+                        <Canvas.Resources>
+                            <Style TargetType="Label">
+                                <Setter Property="FontSize" Value="2" />
+                                <Setter Property="HorizontalContentAlignment" Value="Left" />
+                                <Setter Property="VerticalContentAlignment" Value="Top" />
+                            </Style>
+                            <Style TargetType="Line">
+                                <Setter Property="Stroke" Value="Black"/>
+                                <Setter Property="StrokeThickness" Value="0.1"/>
+                                <Setter Property="StrokeEndLineCap" Value="Triangle"/>
+                            </Style>
+                            <Style TargetType="Ellipse">
+                                <Setter Property="Width" Value="2" />
+                                <Setter Property="Height" Value="2" />
+                            </Style>
+                        </Canvas.Resources>
+
+                        <Label Content="XY" Canvas.Left="-4" Canvas.Top="-4" />
+                        <Label Content="X" Canvas.Left="-5" Canvas.Top="8"/>
+                        <Label Content="Y" Canvas.Left="8" Canvas.Top="-5" />
+                        <Line X1="0" Y1="16" X2="32" Y2="16"/>
+                        <Line X1="16" Y1="0" X2="16" Y2="32"/>
+                        <Ellipse x:Name="ProectionPoint" Fill="Red" Canvas.Left="15" Canvas.Top="15"/>
+                        <Ellipse x:Name="SpheroPoint" Fill="Gray" Canvas.Left="15" Canvas.Top="15"/>
+                        <Ellipse x:Name="ProectionHead" Fill="Blue" Canvas.Left="15" Canvas.Top="15"/>
+                        <Ellipse x:Name="ProectionHandRight" Fill="Green" Canvas.Left="15" Canvas.Top="15"/>
+                        <Ellipse x:Name="ProectionHandLeft" Fill="Green" Canvas.Left="15" Canvas.Top="15"/>
                     </Canvas>
                 </DockPanel>
             </DockPanel>
