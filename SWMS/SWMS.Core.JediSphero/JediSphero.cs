@@ -131,12 +131,14 @@ namespace SWMS.Core.JediSphero
             {
                 return;
             }
+            SetRGBLED(0, 0, 255);
 
 
             var timer = new Timer(miliseconds);
 
             timer.Elapsed += (sender, args) =>
             {
+                SetRGBLED(0, 255, 0);
                 base.Roll((int)angle, 0);
                 UpdateXY();
                 IsMoving = false;
