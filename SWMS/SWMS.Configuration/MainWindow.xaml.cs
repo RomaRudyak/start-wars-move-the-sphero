@@ -30,6 +30,25 @@ namespace SWMS.Configuration
             InitializeComponent();
             this.Loaded += MainWindow_Loaded;
             this.Closed += MainWindow_Closed;
+
+            _pointUIScaleTransform = new MatrixTransform()
+            {
+                Matrix = new Matrix
+                {
+                    M11 = 37.5,
+                    M22 = 37.5,
+                    OffsetX = 150,
+                    OffsetY = 150
+                }
+            };
+
+            _spheroPointTransform = new MatrixTransform()
+            {
+                Matrix = new Matrix
+                {
+                    M22 = -1
+                }
+            };
         }
 
         public JediSphero Device { get; set; }
@@ -120,14 +139,9 @@ namespace SWMS.Configuration
 
         private void SetPosition(UIElement obj, Double x, Double y)
         {
-            var smt =  Scene.LayoutTransform;
-            var p = smt.Transform(new Point(x, y));
-            var scale = 30;
-            var offset = 145;
+            var p = _pointUIScaleTransform.Transform(new Point(x, y));
             Canvas.SetLeft(obj, p.X);
             Canvas.SetTop(obj, p.Y);
-            //Canvas.SetLeft(obj, offset + x * scale);
-            //Canvas.SetTop(obj, offset + y * scale);
         }
 
         private void DrawCameraView(MultiSourceFrame multiframe)
@@ -236,25 +250,30 @@ namespace SWMS.Configuration
         private void JediForceDispel(object obj)
         {
             _isSpheroGrabed = true;
+            ProectionPoint.Visibility = Visibility.Hidden;
         }
 
-        private void JediForceApplying(object arg1, PointF point)
+        private void JediForceApplying(object arg1, PointF forcePoint)
         {
+            ProectionPoint.Visibility = Visibility.Visible;
+
+            var p = _spheroPointTransform.Transform(new Point(forcePoint.X, forcePoint.Y));
+
             if (_isSpheroGrabed)
             {
-                Device.SetConfigurePosition(point.X, point.Y);
-                _lastPoint = point;
+                Device.SetConfigurePosition(p.X, p.Y);
+                _lastPoint = forcePoint;
                 _isSpheroGrabed = false;
                 return;
-            } 
-            
-            if (CoordinateHelper.GetDistance(_lastPoint, point) >= 0.04F)
+            }
+
+            if (CoordinateHelper.GetDistance(_lastPoint, forcePoint) >= 0.04F)
             {
-                Device.MoveTo(point.X, point.Y);
+                Device.MoveTo(p.X, p.Y);
             }
             
-            SetPosition(ProectionPoint, point.X, point.Y);
-            _lastPoint = point;
+            SetPosition(ProectionPoint, forcePoint.X, forcePoint.Y);
+            _lastPoint = forcePoint;
         }
 
         private void SpheroAngle_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
@@ -275,5 +294,7 @@ namespace SWMS.Configuration
         private CoordinateMapper _coordinateMapper;
         private JediGestureRecognizer _jedi;
         private Boolean _isSpheroGrabed = true;
+        private MatrixTransform _pointUIScaleTransform;
+        private MatrixTransform _spheroPointTransform;
     }
 }
