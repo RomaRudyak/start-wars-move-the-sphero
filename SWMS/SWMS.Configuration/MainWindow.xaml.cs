@@ -212,10 +212,10 @@ namespace SWMS.Configuration
             Debug.WriteLine("Speed scale value: {0}", newValue);
             Device.SetSpeedScale(newValue);
             Device.EndConfigure();
-            InitializeJedi();
+            InitializeJediTracking();
         }
 
-        private void InitializeJedi()
+        private void InitializeJediTracking()
         {
             if (_jedi != null)
             {
@@ -226,24 +226,21 @@ namespace SWMS.Configuration
 
             _jedi.ForceApplying += JediForceApplying;
             _jedi.ForceDispel += JediForceDispel;
-            _isInitializationState = true;
+            _isSpheroGrabed = true;
         }
 
         private void JediForceDispel(object obj)
         {
-            _isInitializationState = true;
+            _isSpheroGrabed = true;
         }
 
         private void JediForceApplying(object arg1, PointF point)
         {
-            // For reversing matrix
-            point.Y = -point.Y;
-
-            if (_isInitializationState)
+            if (_isSpheroGrabed)
             {
                 Device.SetConfigurePosition(point.X, point.Y);
                 _lastPoint = point;
-                _isInitializationState = false;
+                _isSpheroGrabed = false;
                 return;
             } 
             
@@ -252,7 +249,7 @@ namespace SWMS.Configuration
                 Device.MoveTo(point.X, point.Y);
             }
             
-            SetPosition(ProectionPoint, point.X, -point.Y);
+            SetPosition(ProectionPoint, point.X, point.Y);
             _lastPoint = point;
         }
 
@@ -267,13 +264,12 @@ namespace SWMS.Configuration
             Device.SetConfigureAngle((int)angleValue);
         }
 
-        private const double gridScaleColef = 1;//0.7;
         private PointF _lastPoint;
         private WriteableBitmap _colorBitmap;
         private KinectSensor _sensor;
         private MultiSourceFrameReader _multiReader;
         private CoordinateMapper _coordinateMapper;
         private JediGestureRecognizer _jedi;
-        private Boolean _isInitializationState = true;
+        private Boolean _isSpheroGrabed = true;
     }
 }
