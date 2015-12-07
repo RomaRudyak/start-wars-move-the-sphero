@@ -28,14 +28,13 @@ namespace SWMS.Core.JediSphero
 
             _speedScale = 0.5;
             _spheroSpeed = 255.0 * _speedScale;
+            _timer = new Timer(_msDelay);
         }
         
         public void StartMove()
         {
-            _timer = new Timer(_msDelay);
-
             Point initPosition = GetCurrentPosition();
-            _nextIterationPoint = initPosition;
+            SetIterationPoint(initPosition);
             SetDestinationPosition(initPosition);
 
             Debug.WriteLine(_iterationDistance);
@@ -55,7 +54,8 @@ namespace SWMS.Core.JediSphero
                 {
                     Debug.WriteLine("In move");
                     Roll((int)spheroAngle, (int)_spheroSpeed);
-                    _nextIterationPoint = GetNextPoint(currentPosition, realAngle, _iterationDistance);
+                    var nextPoint = GetNextPoint(currentPosition, realAngle, _iterationDistance);
+                    SetIterationPoint(nextPoint);
                 }
                 else
                 {
@@ -129,7 +129,11 @@ namespace SWMS.Core.JediSphero
 
         public void SetPosition(Point point)
         {
+            _timer.Stop();
             SetCurrentPosition(point);
+            _nextIterationPoint = point;
+            SetDestinationPosition(point);
+            _timer.Start();
         }
 
         public void SetConfigurationAngle(int angle)
@@ -231,6 +235,11 @@ namespace SWMS.Core.JediSphero
         }
 
         private readonly SpheroConnection _connection;
+
+        private void SetIterationPoint(Point point)
+        {
+            _nextIterationPoint = point;
+        }
 
         private Timer _timer;
         private Point _nextIterationPoint;

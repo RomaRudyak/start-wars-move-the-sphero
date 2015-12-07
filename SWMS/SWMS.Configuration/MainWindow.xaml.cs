@@ -189,7 +189,7 @@ namespace SWMS.Configuration
         {
             if (Device != null)
             {
-                // TODO disconnect sphero
+                Device.Disconnect();
             }
             if (_multiReader != null)
             {
@@ -210,13 +210,14 @@ namespace SWMS.Configuration
 
         private void BeginConfigurationButton_OnClick(object sender, RoutedEventArgs e)
         {
+            RemoveGeustureRecognizerIfNeeded();
             if (Device == null)
             {
                 return;
             }
 
-            Device.BeginConfigure();
-            Device.SetConfigureAngle(0);
+            Device.BeginConfiguration();
+            Device.SetConfigurationAngle(0);
         }
 
         private void ConfiguredButton_OnClick(object sender, RoutedEventArgs e)
@@ -229,22 +230,27 @@ namespace SWMS.Configuration
             double newValue = this.SpheroSpeed.Value / 255;
             Debug.WriteLine("Speed scale value: {0}", newValue);
             Device.SetSpeedScale(newValue);
-            Device.EndConfigure();
+            Device.EndConfiguration();
             InitializeJediTracking();
         }
 
         private void InitializeJediTracking()
+        {
+            RemoveGeustureRecognizerIfNeeded();
+            _jedi = new JediGestureRecognizer(_sensor);
+
+            _jedi.ForceApplying += JediForceApplying;
+            _jedi.ForceDispel += JediForceDispel;
+            _isSpheroGrabed = true;
+        }
+
+        private void RemoveGeustureRecognizerIfNeeded()
         {
             if (_jedi != null)
             {
                 _jedi.Dispose();
                 _jedi = null;
             }
-            _jedi = new JediGestureRecognizer(_sensor);
-
-            _jedi.ForceApplying += JediForceApplying;
-            _jedi.ForceDispel += JediForceDispel;
-            _isSpheroGrabed = true;
         }
 
         private void JediForceDispel(object obj)
@@ -261,7 +267,7 @@ namespace SWMS.Configuration
 
             if (_isSpheroGrabed)
             {
-                Device.SetConfigurePosition(p.X, p.Y);
+                Device.SetPosition(p);
                 _lastPoint = forcePoint;
                 _isSpheroGrabed = false;
                 return;
@@ -284,7 +290,7 @@ namespace SWMS.Configuration
             }
             var angleValue = e.NewValue % 360;
             Debug.WriteLine("Speed angle value: {0}", angleValue);
-            Device.SetConfigureAngle((int)angleValue);
+            Device.SetConfigurationAngle((int)angleValue);
         }
 
         private PointF _lastPoint;
