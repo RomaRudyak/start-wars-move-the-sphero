@@ -67,6 +67,7 @@
     <Compile Include="Extentions\ActionExtentions.cs" />
     <Compile Include="Extentions\CameraSpacePositionExtentions.cs" />
     <Compile Include="Helpers\CoordinatHelper.cs" />
+    <Compile Include="Helpers\PropertyHelper.cs" />
     <Compile Include="JediGestureRecognizer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
