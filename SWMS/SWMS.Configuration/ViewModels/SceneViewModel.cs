@@ -9,12 +9,12 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using SWMS.Core.Helpers;
 
 namespace SWMS.Configuration.ViewModels
 {
     internal class SceneViewModel : BindableBase
     {
-
         public String SpheroName
         {
             get { return _spheroName; }
@@ -73,6 +73,11 @@ namespace SWMS.Configuration.ViewModels
             set { _spheroXZProection = value; }
         }
 
+        public Boolean IsSpheroConnected
+        {
+            get { return _sphero != null; }
+        }
+
         public void Initialize()
         {
             _sensor = KinectSensor.GetDefault();
@@ -115,7 +120,7 @@ namespace SWMS.Configuration.ViewModels
 
             Task.Factory.StartNew(async () =>
             {
-                while (_sphero == null)
+                while (!IsSpheroConnected)
                 {
                     _sphero = await SpheroManager.GetSpheroAsync();
                     if (_sphero == null)
@@ -124,6 +129,7 @@ namespace SWMS.Configuration.ViewModels
                         continue;
                     }
                     SpheroName =_sphero.Name;
+                    OnPropertyChanged(this.GetPropertyName(x => x.IsSpheroConnected));
                 }
             });
         }

@@ -30,7 +30,20 @@
                 <Label 
                     x:Name="KinectStatus"
                     Content="Not conected" 
-                    VerticalAlignment="Center"/>
+                    VerticalAlignment="Center">
+                    <Label.Style>
+                        <Style TargetType="Label">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding KinecteIsAvailable}" Value="True">
+                                    <Setter Property="Content" Value="Connected" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding KinecteIsAvailable}" Value="False">
+                                    <Setter Property="Content" Value="Disconnected" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Label.Style>
+                </Label>
 
             </StackPanel>
 
@@ -49,11 +62,24 @@
                 <Image 
                     Source="Images/sphero.jpg" 
                     VerticalAlignment="Center"/>
-                
+
                 <Label 
                     x:Name="SpheroName" 
                     VerticalAlignment="Center"
-                    Content="Connectring..."/>
+                    Content="Connectring...">
+                    <Label.Style>
+                        <Style TargetType="Label">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsSpheroConnected}" Value="True">
+                                    <Setter Property="Content" Value="Connecting..." />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsSpheroConnected}" Value="False">
+                                    <Setter Property="Content" Value="{Binding Path=SpheroName, StringFormat={}Connected: {0}}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Label.Style>
+                </Label>
 
             </StackPanel>
 
