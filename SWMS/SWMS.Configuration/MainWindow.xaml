@@ -92,6 +92,7 @@
                 <Button 
                     DockPanel.Dock="Top"
                     Content="Begin Configuration" 
+                    IsEnabled="{Binding IsSpheroConnected}"
                     Command="{Binding BeginConfigurationCommand}"/>
                 <TextBlock
                     DockPanel.Dock="Top"
