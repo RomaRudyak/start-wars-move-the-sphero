@@ -64,6 +64,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BindableBase.cs" />
+    <Compile Include="Command.cs" />
     <Compile Include="Extentions\ActionExtentions.cs" />
     <Compile Include="Extentions\CameraSpacePositionExtentions.cs" />
     <Compile Include="Helpers\CoordinatHelper.cs" />
