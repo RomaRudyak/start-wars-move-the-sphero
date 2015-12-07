@@ -10,6 +10,7 @@ using System.Windows;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using SWMS.Core.Helpers;
+using System.Windows.Input;
 
 namespace SWMS.Configuration.ViewModels
 {
@@ -78,6 +79,49 @@ namespace SWMS.Configuration.ViewModels
             get { return _sphero != null; }
         }
 
+        public Boolean IsForceApplying
+        {
+            get { return _isForceApplying; }
+            set
+            {
+                if (_isForceApplying == value)
+                {
+                    return;
+                }
+                _isForceApplying = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public Boolean IsInConfigurationMode
+        {
+            get { return _isInConfigurationMode; }
+            set {
+                if (_isInConfigurationMode == value)
+                {
+                    return;
+                }
+                _isInConfigurationMode = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public ICommand BeginConfigurationCommand
+        {
+            get
+            {
+                return _beginConfigurationCommand ?? (_beginConfigurationCommand = new Command(BeginConfiguration));
+            }
+        }
+
+        public ICommand EndConfigurationCommand
+        {
+            get
+            {
+                return _endConfigurationCommand ?? (_endConfigurationCommand = new Command(EndConfiguration));
+            }
+        }
+
         public void Initialize()
         {
             _sensor = KinectSensor.GetDefault();
@@ -99,7 +143,6 @@ namespace SWMS.Configuration.ViewModels
             GetSphero();
         }
 
-
         public SceneViewModel()
         {
             _spheroPointTransform = new MatrixTransform()
@@ -110,6 +153,7 @@ namespace SWMS.Configuration.ViewModels
                 }
             };
         }
+
 
         private void GetSphero()
         {
@@ -133,7 +177,6 @@ namespace SWMS.Configuration.ViewModels
                 }
             });
         }
-
 
         private void FrameArrived(object sender, MultiSourceFrameArrivedEventArgs e)
         {
@@ -218,6 +261,19 @@ namespace SWMS.Configuration.ViewModels
         }
 
 
+        private void BeginConfiguration()
+        {
+            IsInConfigurationMode = true;
+        }
+
+        private void EndConfiguration()
+        {
+            IsInConfigurationMode = false;
+
+        }
+        
+
+
         private Point _headXZProection;
         private Point _handRigthXZProection;
         private Point _handLeftXZProection;
@@ -232,6 +288,10 @@ namespace SWMS.Configuration.ViewModels
         private MultiSourceFrameReader _multiReader;
         private JediSphero _sphero;
         private MatrixTransform _spheroPointTransform;
+        private bool _isForceApplying;
+        private bool _isInConfigurationMode;
+        private ICommand _beginConfigurationCommand;
+        private ICommand _endConfigurationCommand;
 
     }
 }

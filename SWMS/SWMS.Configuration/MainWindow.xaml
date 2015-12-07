@@ -89,10 +89,14 @@
                 Grid.Row="1"
                 LastChildFill="True"
                 >
-
+                <Button 
+                    DockPanel.Dock="Top"
+                    Content="Begin Configuration" 
+                    Command="{Binding BeginConfigurationCommand}"/>
                 <TextBlock
                     DockPanel.Dock="Top"
                     Text="{Binding ElementName=SpheroAngle, Path=Value, StringFormat={}Angle: {0}, UpdateSourceTrigger=PropertyChanged}"
+                    IsEnabled="{Binding IsInConfigurationMode}"
                     />
 
                 <Slider
@@ -105,11 +109,13 @@
                     TickFrequency="1"
                     TickPlacement="Both"
                     ValueChanged="SpheroAngle_ValueChanged"
+                    IsEnabled="{Binding IsInConfigurationMode}"
                     />
 
                 <TextBlock
                     DockPanel.Dock="Top"
                     Text="{Binding ElementName=SpheroSpeed, Path=Value, StringFormat={}Speed: {0}, UpdateSourceTrigger=PropertyChanged}"
+                    IsEnabled="{Binding IsInConfigurationMode}"
                     />
 
                 <Slider
@@ -121,15 +127,15 @@
                     IsSnapToTickEnabled="True"
                     TickFrequency="1"
                     TickPlacement="Both"
+                    IsEnabled="{Binding IsInConfigurationMode}"
                     />
-                <Button 
-                    DockPanel.Dock="Top"
-                    Content="Begin Configuration" 
-                    Click="BeginConfigurationButton_OnClick"/>
+                
                 <Button 
                     DockPanel.Dock="Top"
                     Content="End Configuration" 
-                    Click="ConfiguredButton_OnClick"/>
+                    Command="{Binding EndConfigurationCommand}"
+                    IsEnabled="{Binding IsInConfigurationMode}"
+                    />
                 <DockPanel
                     VerticalAlignment="Stretch"
                     >
@@ -165,7 +171,20 @@
                         <Label Content="4" Canvas.Left="150" Canvas.Top="270" />
                         <Line X1="0" Y1="150" X2="300" Y2="150"/>
                         <Line X1="150" Y1="0" X2="150" Y2="300"/>
-                        <Ellipse x:Name="ProectionPoint" Fill="Red" Canvas.Left="145" Canvas.Top="145"/>
+                        <Ellipse x:Name="ProectionPoint" Fill="Red" Canvas.Left="145" Canvas.Top="145">
+                            <Ellipse.Style>
+                                <Style TargetType="Ellipse">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=IsForceApplying}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Path=IsForceApplying}" Value="False">
+                                            <Setter Property="Visibility" Value="Hidden"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Ellipse.Style>
+                        </Ellipse>
                         <Ellipse x:Name="SpheroPoint" Fill="Gray" Canvas.Left="145" Canvas.Top="145"/>
                         <Ellipse x:Name="ProectionHead" Fill="Blue" Canvas.Left="145" Canvas.Top="145"/>
                         <Ellipse x:Name="ProectionHandRight" Fill="Green" Canvas.Left="145" Canvas.Top="145"/>

@@ -171,8 +171,6 @@ namespace SWMS.Configuration
 
         private void JediForceApplying(object arg1, Point forcePoint)
         {
-            ProectionPoint.Visibility = Visibility.Visible;
-
             var p = _spheroPointTransform.Transform(forcePoint);
 
             if (_isSpheroGrabed)
@@ -188,7 +186,6 @@ namespace SWMS.Configuration
                 Device.MoveTo(p.X, p.Y);
             }
             
-            SetPosition(ProectionPoint, forcePoint);
             _lastPoint = forcePoint;
         }
 
