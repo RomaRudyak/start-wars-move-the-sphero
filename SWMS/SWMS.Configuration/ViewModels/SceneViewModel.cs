@@ -95,6 +95,17 @@ namespace SWMS.Configuration.ViewModels
         }
 
 
+        public SceneViewModel()
+        {
+            _spheroPointTransform = new MatrixTransform()
+            {
+                Matrix = new Matrix
+                {
+                    M22 = -1
+                }
+            };
+        }
+
         private void GetSphero()
         {
             if (_sphero != null)
@@ -122,7 +133,7 @@ namespace SWMS.Configuration.ViewModels
         {
             var multiframe = e.FrameReference.AcquireFrame();
             UpdateCameraView(multiframe);
-            HandBodyPartsOnGrid(multiframe);
+            UpdateBodyPartsPosition(multiframe);
         }
 
         private void IsAvailableChanged(object sender, IsAvailableChangedEventArgs e)
@@ -159,7 +170,7 @@ namespace SWMS.Configuration.ViewModels
             }
         }
 
-        private void HandBodyPartsOnGrid(MultiSourceFrame multiframe)
+        private void UpdateBodyPartsPosition(MultiSourceFrame multiframe)
         {
             using (var bodyFrame = multiframe.BodyFrameReference.AcquireFrame())
             {
@@ -190,7 +201,7 @@ namespace SWMS.Configuration.ViewModels
                 
                 if (_sphero != null)
                 {
-                    SpheroXZProextion = GetXZProection(_sphero.CurrentX, -_sphero.CurrentY);
+                    SpheroXZProextion = _spheroPointTransform.Transform(_sphero.CurrentPoint);
                 }
             }
         }
@@ -214,6 +225,7 @@ namespace SWMS.Configuration.ViewModels
         private KinectSensor _sensor;
         private MultiSourceFrameReader _multiReader;
         private JediSphero _sphero;
+        private MatrixTransform _spheroPointTransform;
 
     }
 }

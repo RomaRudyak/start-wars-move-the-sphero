@@ -38,7 +38,8 @@
                 Grid.Column="0"
                 Grid.Row="1">
                 <Image 
-                    x:Name="KinectViewSpace"/>
+                    x:Name="KinectViewSpace"
+                    Source="{Binding ColorView}"/>
             </Viewbox>
 
             <StackPanel

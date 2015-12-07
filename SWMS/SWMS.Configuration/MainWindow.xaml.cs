@@ -34,6 +34,8 @@ namespace SWMS.Configuration
             this.Loaded += MainWindow_Loaded;
             this.Closed += MainWindow_Closed;
 
+            _sceneViewModel.PropertyChanged += SceneViewModelPropertyChanged;
+
             _pointUIScaleTransform = new MatrixTransform()
             {
                 Matrix = new Matrix
@@ -53,58 +55,38 @@ namespace SWMS.Configuration
                 }
             };
         }
-
+        
         public JediSphero Device { get; set; }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-
-            _multiReader.MultiSourceFrameArrived += FrameArrived;
-
-            
+            _sceneViewModel.Initialize();
         }
 
-        private void FrameArrived(object sender, MultiSourceFrameArrivedEventArgs e)
+        private void SceneViewModelPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            var multiframe = e.FrameReference.AcquireFrame();
-            HandBodyPartsOnGrid(multiframe);
-        }
-
-        private void HandBodyPartsOnGrid(MultiSourceFrame multiframe)
-        {
-            using (var bodyFrame = multiframe.BodyFrameReference.AcquireFrame())
+            if (e.PropertyName == _sceneViewModel.GetPropertyName(x => x.SpheroXZProextion))
             {
-                if (bodyFrame == null)
-                {
-                    return;
-                }
-
-                var bodies = new Body[bodyFrame.BodyCount];
-                bodyFrame.GetAndRefreshBodyData(bodies);
-
-                var body = bodies.FirstOrDefault(b => b.IsTracked);
-                if (body == null)
-                {
-                    return;
-                }
-
-                var posHead = body.Joints[JointType.Head].Position;
-                var posHandRight = body.Joints[JointType.HandRight].Position;
-                var posHandLeft = body.Joints[JointType.HandLeft].Position;
-
-                SetPosition(ProectionHead, posHead.X, posHead.Z);
-                SetPosition(ProectionHandRight, posHandRight.X, posHandRight.Z);
-                SetPosition(ProectionHandLeft, posHandLeft.X, posHandLeft.Z);
-                if (Device != null)
-                {
-                    SetPosition(SpheroPoint, Device.CurrentX, -Device.CurrentY);
-                }
+                SetPosition(SpheroPoint, _sceneViewModel.SpheroXZProextion);
+            }
+            else if (e.PropertyName == _sceneViewModel.GetPropertyName(x => x.HeadXZProextion))
+            {
+                SetPosition(ProectionHead, _sceneViewModel.HeadXZProextion);
+                
+            }
+            else if (e.PropertyName == _sceneViewModel.GetPropertyName(x => x.HandRigthXZProextion))
+            {
+                SetPosition(ProectionHandRight, _sceneViewModel.HandRigthXZProextion);
+            }
+            else if (e.PropertyName == _sceneViewModel.GetPropertyName(x => x.HandLeftXZProextion))
+            {
+                SetPosition(ProectionHandLeft, _sceneViewModel.HandLeftXZProextion);
             }
         }
-
-        private void SetPosition(UIElement obj, Double x, Double y)
+        
+        private void SetPosition(UIElement obj, Point point)
         {
-            var p = _pointUIScaleTransform.Transform(new Point(x, y));
+            var p = _pointUIScaleTransform.Transform(point);
             Canvas.SetLeft(obj, p.X);
             Canvas.SetTop(obj, p.Y);
         }
@@ -206,7 +188,7 @@ namespace SWMS.Configuration
                 Device.MoveTo(p.X, p.Y);
             }
             
-            SetPosition(ProectionPoint, forcePoint.X, forcePoint.Y);
+            SetPosition(ProectionPoint, forcePoint);
             _lastPoint = forcePoint;
         }
 
