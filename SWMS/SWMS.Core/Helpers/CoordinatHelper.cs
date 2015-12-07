@@ -4,12 +4,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace SWMS.Core.Helpers
 {
     public static class CoordinateHelper
     {
-        public static Double GetDistance(PointF p1, PointF p2)
+        public static Double GetDistance(Point p1, Point p2)
         {
             return Math.Abs(Math.Sqrt(Math.Pow(p2.X - p1.X, 2) + Math.Pow(p2.Y - p1.Y, 2)));
         }
@@ -20,15 +21,15 @@ namespace SWMS.Core.Helpers
         }
 
 
-        public static Single FindPointProection(PointF b, PointF m)
+        public static Double FindPointProection(Point b, Point m)
         {
-            var a = new PointF()
+            var a = new Point()
             {
                 X = b.X,
                 Y = 0F
             };
 
-            var k = new PointF
+            var k = new Point
             {
                 X = b.X,
                 Y = m.Y
@@ -40,8 +41,8 @@ namespace SWMS.Core.Helpers
             var abDistnce = CoordinateHelper.GetDistance(a, b);
             var acDistance = abDistnce * tgAlpha;
             return a.X < m.X
-                ? a.X + Convert.ToSingle(acDistance)
-                : a.X - Convert.ToSingle(acDistance);
+                ? a.X + acDistance
+                : a.X - acDistance;
         }
 
 

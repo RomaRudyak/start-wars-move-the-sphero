@@ -17,6 +17,7 @@ using SWMS.Core;
 using SWMS.Core.JediSphero;
 using System.Diagnostics;
 using SWMS.Core.Helpers;
+using SWMS.Configuration.ViewModels;
 
 namespace SWMS.Configuration
 {
@@ -28,6 +29,8 @@ namespace SWMS.Configuration
         public MainWindow()
         {
             InitializeComponent();
+            _sceneViewModel = new SceneViewModel();
+            this.DataContext = _sceneViewModel;
             this.Loaded += MainWindow_Loaded;
             this.Closed += MainWindow_Closed;
 
@@ -55,53 +58,15 @@ namespace SWMS.Configuration
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            _sensor = KinectSensor.GetDefault();
-
-            _sensor.IsAvailableChanged += IsAvailableChanged;
-
-            FrameDescription colorFrameDescription = _sensor.ColorFrameSource.CreateFrameDescription(ColorImageFormat.Bgra);
-
-            _colorBitmap = new WriteableBitmap(colorFrameDescription.Width, colorFrameDescription.Height, 96.0, 96.0, PixelFormats.Bgr32, null);
-
-            KinectViewSpace.Source = _colorBitmap;
-
-            _multiReader = _sensor.OpenMultiSourceFrameReader(FrameSourceTypes.Color | FrameSourceTypes.Depth | FrameSourceTypes.Body);
 
             _multiReader.MultiSourceFrameArrived += FrameArrived;
 
-            _sensor.Open();
-
-            UpdateKinectStaus(_sensor.IsAvailable);
-
-            GetSphero();
-        }
-
-        private void GetSphero()
-        {
-            if (Device != null)
-            {
-                return;
-            }
-
-            Task.Factory.StartNew(async () =>
-            {
-                while (Device == null)
-                {
-                    Device = await SpheroManager.GetSpheroAsync();
-                    if (Device == null)
-                    {
-                        await Task.Delay(1000);
-                        continue;
-                    }
-                    Dispatcher.Invoke(() => SpheroName.Content = String.Format("Connected: {0}", Device.Name));
-                }
-            });
+            
         }
 
         private void FrameArrived(object sender, MultiSourceFrameArrivedEventArgs e)
         {
             var multiframe = e.FrameReference.AcquireFrame();
-            DrawCameraView(multiframe);
             HandBodyPartsOnGrid(multiframe);
         }
 
@@ -142,47 +107,6 @@ namespace SWMS.Configuration
             var p = _pointUIScaleTransform.Transform(new Point(x, y));
             Canvas.SetLeft(obj, p.X);
             Canvas.SetTop(obj, p.Y);
-        }
-
-        private void DrawCameraView(MultiSourceFrame multiframe)
-        {
-            using (ColorFrame colorFrame = multiframe.ColorFrameReference.AcquireFrame())
-            {
-                if (colorFrame != null)
-                {
-                    FrameDescription colorFrameDescription = colorFrame.FrameDescription;
-
-                    using (KinectBuffer colorBuffer = colorFrame.LockRawImageBuffer())
-                    {
-                        this._colorBitmap.Lock();
-
-                        // verify data and write the new color frame data to the display bitmap
-                        if ((colorFrameDescription.Width == this._colorBitmap.PixelWidth) && (colorFrameDescription.Height == this._colorBitmap.PixelHeight))
-                        {
-                            colorFrame.CopyConvertedFrameDataToIntPtr(
-                                this._colorBitmap.BackBuffer,
-                                (uint)(colorFrameDescription.Width * colorFrameDescription.Height * 4),
-                                ColorImageFormat.Bgra);
-
-                            this._colorBitmap.AddDirtyRect(new Int32Rect(0, 0, this._colorBitmap.PixelWidth, this._colorBitmap.PixelHeight));
-                        }
-
-                        this._colorBitmap.Unlock();
-                    }
-                }
-            }
-        }
-
-        private void IsAvailableChanged(object sender, IsAvailableChangedEventArgs e)
-        {
-            UpdateKinectStaus(e.IsAvailable);
-        }
-
-        private void UpdateKinectStaus(Boolean isAvailable)
-        {
-            KinectStatus.Content = isAvailable
-                ? "Connected"
-                : "Disconnected";
         }
 
         private void MainWindow_Closed(object sender, EventArgs e)
@@ -263,11 +187,11 @@ namespace SWMS.Configuration
             ProectionPoint.Visibility = Visibility.Hidden;
         }
 
-        private void JediForceApplying(object arg1, PointF forcePoint)
+        private void JediForceApplying(object arg1, Point forcePoint)
         {
             ProectionPoint.Visibility = Visibility.Visible;
 
-            var p = _spheroPointTransform.Transform(new Point(forcePoint.X, forcePoint.Y));
+            var p = _spheroPointTransform.Transform(forcePoint);
 
             if (_isSpheroGrabed)
             {
@@ -297,7 +221,7 @@ namespace SWMS.Configuration
             Device.SetConfigurationAngle((int)angleValue);
         }
 
-        private PointF _lastPoint;
+        private Point _lastPoint;
         private WriteableBitmap _colorBitmap;
         private KinectSensor _sensor;
         private MultiSourceFrameReader _multiReader;
@@ -306,5 +230,6 @@ namespace SWMS.Configuration
         private Boolean _isSpheroGrabed = true;
         private MatrixTransform _pointUIScaleTransform;
         private MatrixTransform _spheroPointTransform;
+        private SceneViewModel _sceneViewModel;
     }
 }

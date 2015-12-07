@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using SWMS.Core.Extentions;
 using SWMS.Core.Helpers;
 using System.Diagnostics;
+using System.Windows;
 
 namespace SWMS.Core
 {
@@ -15,7 +16,7 @@ namespace SWMS.Core
         /// <summary>
         /// Fires when Jedi moving something with force
         /// </summary>
-        public event Action<Object, PointF> ForceApplying;
+        public event Action<Object, Point> ForceApplying;
 
         /// <summary>
         /// Fires when Jedi stop using the force
@@ -133,7 +134,7 @@ namespace SWMS.Core
                 var headZY = headPosition.GetProectionForZY();
                 var y = CoordinateHelper.FindPointProection(headZY, handPosition.GetProectionForZY());
 
-                var point = new PointF { X = x, Y = y };
+                var point = new Point { X = x, Y = y };
                 ForceApplying.SafeRise(this, point);
                 Debug.WriteLine("Force Point: x={0} y={1}", point.X, point.Y);
                 ResetTrackingCounters();
