@@ -30,7 +30,20 @@
                 <Label 
                     x:Name="KinectStatus"
                     Content="Not conected" 
-                    VerticalAlignment="Center"/>
+                    VerticalAlignment="Center">
+                    <Label.Style>
+                        <Style TargetType="Label">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding KinecteIsAvailable}" Value="True">
+                                    <Setter Property="Content" Value="Connected" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding KinecteIsAvailable}" Value="False">
+                                    <Setter Property="Content" Value="Disconnected" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Label.Style>
+                </Label>
 
             </StackPanel>
 
@@ -38,7 +51,8 @@
                 Grid.Column="0"
                 Grid.Row="1">
                 <Image 
-                    x:Name="KinectViewSpace"/>
+                    x:Name="KinectViewSpace"
+                    Source="{Binding ColorView}"/>
             </Viewbox>
 
             <StackPanel
@@ -48,11 +62,24 @@
                 <Image 
                     Source="Images/sphero.jpg" 
                     VerticalAlignment="Center"/>
-                
+
                 <Label 
                     x:Name="SpheroName" 
                     VerticalAlignment="Center"
-                    Content="Connectring..."/>
+                    Content="Connectring...">
+                    <Label.Style>
+                        <Style TargetType="Label">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsSpheroConnected}" Value="True">
+                                    <Setter Property="Content" Value="Connecting..." />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsSpheroConnected}" Value="False">
+                                    <Setter Property="Content" Value="{Binding Path=SpheroName, StringFormat={}Connected: {0}}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Label.Style>
+                </Label>
 
             </StackPanel>
 
@@ -62,10 +89,15 @@
                 Grid.Row="1"
                 LastChildFill="True"
                 >
-
+                <Button 
+                    DockPanel.Dock="Top"
+                    Content="Begin Configuration" 
+                    IsEnabled="{Binding IsSpheroConnected}"
+                    Command="{Binding BeginConfigurationCommand}"/>
                 <TextBlock
                     DockPanel.Dock="Top"
                     Text="{Binding ElementName=SpheroAngle, Path=Value, StringFormat={}Angle: {0}, UpdateSourceTrigger=PropertyChanged}"
+                    IsEnabled="{Binding IsInConfigurationMode}"
                     />
 
                 <Slider
@@ -73,16 +105,17 @@
                     DockPanel.Dock="Top"
                     Minimum="0"
                     Maximum="360"
-                    Value="0"
+                    Value="{Binding ConfigurationAngle}"
                     IsSnapToTickEnabled="True"
                     TickFrequency="1"
                     TickPlacement="Both"
-                    ValueChanged="SpheroAngle_ValueChanged"
+                    IsEnabled="{Binding IsInConfigurationMode}"
                     />
 
                 <TextBlock
                     DockPanel.Dock="Top"
                     Text="{Binding ElementName=SpheroSpeed, Path=Value, StringFormat={}Speed: {0}, UpdateSourceTrigger=PropertyChanged}"
+                    IsEnabled="{Binding IsInConfigurationMode}"
                     />
 
                 <Slider
@@ -90,19 +123,19 @@
                     x:Name="SpheroSpeed"
                     Minimum="0"
                     Maximum="255"
-                    Value="157"
+                    Value="{Binding ConfiqurationSpeed, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     IsSnapToTickEnabled="True"
                     TickFrequency="1"
                     TickPlacement="Both"
+                    IsEnabled="{Binding IsInConfigurationMode}"
                     />
-                <Button 
-                    DockPanel.Dock="Top"
-                    Content="Begin Configuration" 
-                    Click="BeginConfigurationButton_OnClick"/>
+                
                 <Button 
                     DockPanel.Dock="Top"
                     Content="End Configuration" 
-                    Click="ConfiguredButton_OnClick"/>
+                    Command="{Binding EndConfigurationCommand}"
+                    IsEnabled="{Binding IsInConfigurationMode}"
+                    />
                 <DockPanel
                     VerticalAlignment="Stretch"
                     >
@@ -138,11 +171,24 @@
                         <Label Content="4" Canvas.Left="150" Canvas.Top="270" />
                         <Line X1="0" Y1="150" X2="300" Y2="150"/>
                         <Line X1="150" Y1="0" X2="150" Y2="300"/>
-                        <Ellipse x:Name="ProectionPoint" Fill="Red" Canvas.Left="145" Canvas.Top="145"/>
+                        <Ellipse x:Name="ProjectionPoint" Fill="Red" Canvas.Left="145" Canvas.Top="145">
+                            <!--<Ellipse.Style>
+                                <Style TargetType="Ellipse">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Path=IsForceApplying}" Value="True">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                        <DataTrigger Binding="{Binding Path=IsForceApplying}" Value="False">
+                                            <Setter Property="Visibility" Value="Hidden"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Ellipse.Style>-->
+                        </Ellipse>
                         <Ellipse x:Name="SpheroPoint" Fill="Gray" Canvas.Left="145" Canvas.Top="145"/>
-                        <Ellipse x:Name="ProectionHead" Fill="Blue" Canvas.Left="145" Canvas.Top="145"/>
-                        <Ellipse x:Name="ProectionHandRight" Fill="Green" Canvas.Left="145" Canvas.Top="145"/>
-                        <Ellipse x:Name="ProectionHandLeft" Fill="Green" Canvas.Left="145" Canvas.Top="145"/>
+                        <Ellipse x:Name="ProjectionHead" Fill="Blue" Canvas.Left="145" Canvas.Top="145"/>
+                        <Ellipse x:Name="ProjectionHandRight" Fill="Green" Canvas.Left="145" Canvas.Top="145"/>
+                        <Ellipse x:Name="ProjectionHandLeft" Fill="Green" Canvas.Left="145" Canvas.Top="145"/>
                     </Canvas>
                 </DockPanel>
             </DockPanel>

@@ -60,11 +60,15 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BindableBase.cs" />
+    <Compile Include="Command.cs" />
     <Compile Include="Extentions\ActionExtentions.cs" />
     <Compile Include="Extentions\CameraSpacePositionExtentions.cs" />
     <Compile Include="Helpers\CoordinatHelper.cs" />
+    <Compile Include="Helpers\PropertyHelper.cs" />
     <Compile Include="JediGestureRecognizer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

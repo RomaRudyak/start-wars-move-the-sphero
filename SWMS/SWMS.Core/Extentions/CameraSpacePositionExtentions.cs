@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace SWMS.Core.Extentions
 {
@@ -14,9 +15,9 @@ namespace SWMS.Core.Extentions
         /// </summary>
         /// <param name="point"></param>
         /// <returns></returns>
-        public static PointF GetProectionForZY(this CameraSpacePoint point)
+        public static Point GetProjectionForZY(this CameraSpacePoint point)
         {
-            return new PointF { X = point.Z, Y = point.Y };
+            return new Point { X = point.Z, Y = point.Y };
         }
 
         /// <summary>
@@ -24,9 +25,9 @@ namespace SWMS.Core.Extentions
         /// </summary>
         /// <param name="point"></param>
         /// <returns></returns>
-        public static PointF GetProectionForXZ(this CameraSpacePoint point)
+        public static Point GetProjectionForXZ(this CameraSpacePoint point)
         {
-            return new PointF { X = point.X, Y = point.Z };
+            return new Point { X = point.X, Y = point.Z };
         }
 
         public static CameraSpacePoint GetAccumulatedAvarage(this CameraSpacePoint lastAnchor, CameraSpacePoint newPosition, ref Int32 count)

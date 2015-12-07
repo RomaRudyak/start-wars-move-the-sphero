@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using SWMS.Core.Extentions;
 using SWMS.Core.Helpers;
 using System.Diagnostics;
+using System.Windows;
 
 namespace SWMS.Core
 {
@@ -15,7 +16,7 @@ namespace SWMS.Core
         /// <summary>
         /// Fires when Jedi moving something with force
         /// </summary>
-        public event Action<Object, PointF> ForceApplying;
+        public event Action<Object, Point> ForceApplying;
 
         /// <summary>
         /// Fires when Jedi stop using the force
@@ -129,17 +130,16 @@ namespace SWMS.Core
                 var handPosition = _lastHandPosition;
                 var headPosition = _lastHeadPosition;
 
-                var x = CoordinateHelper.FindPointProection(headPosition.GetProectionForXZ(), handPosition.GetProectionForXZ());
-                var headZY = headPosition.GetProectionForZY();
-                var y = CoordinateHelper.FindPointProection(headZY, handPosition.GetProectionForZY());
+                var x = CoordinateHelper.FindPointProjection(headPosition.GetProjectionForXZ(), handPosition.GetProjectionForXZ());
+                var headZY = headPosition.GetProjectionForZY();
+                var y = CoordinateHelper.FindPointProjection(headZY, handPosition.GetProjectionForZY());
 
-                var point = new PointF { X = x, Y = y };
+                var point = new Point { X = x, Y = y };
                 ForceApplying.SafeRise(this, point);
                 Debug.WriteLine("Force Point: x={0} y={1}", point.X, point.Y);
                 ResetTrackingCounters();
             }
-
-            if (CanFireForesDispel())
+            else if (CanFireForesDispel())
             {
                 ForceDispel.SafeRise(this);
                 ResetTrackingCounters();
@@ -148,19 +148,19 @@ namespace SWMS.Core
 
         private Boolean CanFireForesDispel()
         {
-            return _handTrackedCount != 0 && _handTrackedCount != _frameCount;
+            return _frameCount % Frequency == 0 && _frameCount - _handTrackedCount > Epsylon;
         }
 
         private Boolean CanFireForesMove()
         {
-            return _frameCount % Frequency == 0 && _handTrackedCount == Frequency;
+            return _frameCount % Frequency == 0 && _frameCount - _handTrackedCount <= Epsylon;
         }
 
         private void ResetTrackingCounters(int reset = 0)
         {
             _handTrackedCount = reset;
             _headTrackedCount = reset;
-            _frameCount = 0;
+            _frameCount = reset;
         }
 
         private Boolean IsHandInInitialGesture(HandState handState)
@@ -176,6 +176,7 @@ namespace SWMS.Core
         private static readonly HandState InitialHandState = HandState.Open;
         private MultiSourceFrameReader _reader;
         private KinectSensor _sensor;
-        private readonly int Frequency = 4;
+        private readonly int Frequency = 8;
+        private readonly int Epsylon = 3;
     }
 }

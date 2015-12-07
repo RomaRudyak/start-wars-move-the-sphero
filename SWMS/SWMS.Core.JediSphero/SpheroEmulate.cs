@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Threading;
+using System.Timers;
 using System.Windows;
 using Sphero.Communication;
 using Sphero.Devices;
@@ -17,9 +18,10 @@ namespace SWMS.Core.JediSphero
         //private void SetHeading(int configAngle){}
 
         //public JediSphero(SpheroConnection connection)
-        public JediSphero(SpheroConnection connection): base(connection)
+        public JediSphero(SpheroConnection connection)
+            : base(connection)
         {
-            double frequency = 10;
+            double frequency = 20;
             _msDelay = (int)(1000.0 / frequency);
 
             _connection = connection;
@@ -29,52 +31,50 @@ namespace SWMS.Core.JediSphero
             _speedScale = 0.5;
             _spheroSpeed = 255.0 * _speedScale;
             _timer = new Timer(_msDelay);
-        }
-        
-        public void StartMove()
-        {
-            Point initPosition = GetCurrentPosition();
-            SetIterationPoint(initPosition);
-            SetDestinationPosition(initPosition);
-
-            Debug.WriteLine(_iterationDistance);
-
-            _timer.Elapsed += (sender, args) =>
-            {
-                Point currentPosition = _nextIterationPoint;
-                SetCurrentPosition(currentPosition);
-                Point destinationPosition = GetDestinationPosition();
-                double spheroAngle = GetSpheroAngle(currentPosition, destinationPosition);
-                double realAngle = GetAngle(currentPosition, destinationPosition);
-                double realDistance = GetDistance(currentPosition, destinationPosition);
-
-                Debug.WriteLine("Real distance {0}", realDistance);
-                
-                if (realDistance >= _iterationDistance)
-                {
-                    Debug.WriteLine("In move");
-                    Roll((int)spheroAngle, (int)_spheroSpeed);
-                    var nextPoint = GetNextPoint(currentPosition, realAngle, _iterationDistance);
-                    SetIterationPoint(nextPoint);
-                }
-                else
-                {
-                    Debug.WriteLine("Not move");
-                    Roll((int)spheroAngle, 0);
-                }
-            };
-
+            _timer.Elapsed += IterationHandler;
             _timer.Start();
         }
 
+        private volatile bool _allowMoving;
+
+        private void IterationHandler(object sender, ElapsedEventArgs arhs)
+        {
+            if (!IsInitialized)
+            {
+                return;
+            }
+
+            Point currentPosition = _nextIterationPoint;
+            SetCurrentPosition(currentPosition);
+            Point destinationPosition = GetDestinationPosition();
+            double spheroAngle = GetSpheroAngle(currentPosition, destinationPosition);
+            double realDistance = GetDistance(currentPosition, destinationPosition);
+
+            Debug.WriteLine("Real distance {0}", realDistance);
+
+            if (realDistance >= _iterationDistance)
+            {
+                Debug.WriteLine("In move");
+                _lastAngle = (int) spheroAngle;
+                Roll(_lastAngle, (int)_spheroSpeed);
+                double realAngle = GetAngle(currentPosition, destinationPosition);
+                var nextPoint = CalculateNextIterationPosition(currentPosition, realAngle, _iterationDistance);
+                SetNextIterationPosition(nextPoint);
+            }
+            else
+            {
+                Debug.WriteLine("Not move");
+                Roll(_lastAngle, 0);
+            }
+        }
+
+        private volatile int _lastAngle;
+
         public void StopMove()
         {
-            if (_timer != null)
-            {
-                _timer.Stop();
-                Roll(0, 0);
-                SetCurrentPosition(_nextIterationPoint);
-            }
+            var currentPosition = _nextIterationPoint;
+            SetCurrentPosition(currentPosition);
+            SetDestinationPosition(currentPosition);
         }
 
         public bool IsInitialized { get; private set; }
@@ -102,6 +102,7 @@ namespace SWMS.Core.JediSphero
         public void BeginConfiguration()
         {
             StopMove();
+
             IsInitialized = false;
             SetRGBLED(255, 0, 0);
             SetBackLED(255);
@@ -113,8 +114,6 @@ namespace SWMS.Core.JediSphero
             _realSpeed = MAX_SPEED * _speedScale;
             _iterationDistance = _realSpeed * (_msDelay / 1000.0);
         }
-
-        
 
         public void SetSpeedScale(double scale)
         {
@@ -129,11 +128,9 @@ namespace SWMS.Core.JediSphero
 
         public void SetPosition(Point point)
         {
-            _timer.Stop();
+            SetNextIterationPosition(point);
             SetCurrentPosition(point);
-            _nextIterationPoint = point;
             SetDestinationPosition(point);
-            _timer.Start();
         }
 
         public void SetConfigurationAngle(int angle)
@@ -148,7 +145,6 @@ namespace SWMS.Core.JediSphero
             SetBackLED(0);
             SetHeading(_configAngle);
             IsInitialized = true;
-            StartMove();
         }
 
         public void MoveTo(double x, double y)
@@ -182,10 +178,11 @@ namespace SWMS.Core.JediSphero
 
         public void Disconnect()
         {
+            _timer.Stop();
             _connection.Disconnect();
         }
 
-        private Point GetNextPoint(Point a, double angle, double distance)
+        private Point CalculateNextIterationPosition(Point a, double angle, double distance)
         {
             var dy = Math.Cos((angle * Math.PI / 180)) * distance;
             var dx = Math.Sin((angle * Math.PI / 180)) * distance;
@@ -236,7 +233,7 @@ namespace SWMS.Core.JediSphero
 
         private readonly SpheroConnection _connection;
 
-        private void SetIterationPoint(Point point)
+        private void SetNextIterationPosition(Point point)
         {
             _nextIterationPoint = point;
         }
