@@ -15,7 +15,7 @@ namespace SWMS.Core.Extentions
         /// </summary>
         /// <param name="point"></param>
         /// <returns></returns>
-        public static Point GetProectionForZY(this CameraSpacePoint point)
+        public static Point GetProjectionForZY(this CameraSpacePoint point)
         {
             return new Point { X = point.Z, Y = point.Y };
         }
@@ -25,7 +25,7 @@ namespace SWMS.Core.Extentions
         /// </summary>
         /// <param name="point"></param>
         /// <returns></returns>
-        public static Point GetProectionForXZ(this CameraSpacePoint point)
+        public static Point GetProjectionForXZ(this CameraSpacePoint point)
         {
             return new Point { X = point.X, Y = point.Z };
         }

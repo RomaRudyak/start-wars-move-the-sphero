@@ -21,7 +21,7 @@ namespace SWMS.Core.Helpers
         }
 
 
-        public static Double FindPointProection(Point b, Point m)
+        public static Double FindPointProjection(Point b, Point m)
         {
             var a = new Point()
             {

@@ -105,11 +105,10 @@
                     DockPanel.Dock="Top"
                     Minimum="0"
                     Maximum="360"
-                    Value="0"
+                    Value="{Binding ConfigurationAngle}"
                     IsSnapToTickEnabled="True"
                     TickFrequency="1"
                     TickPlacement="Both"
-                    ValueChanged="SpheroAngle_ValueChanged"
                     IsEnabled="{Binding IsInConfigurationMode}"
                     />
 
@@ -124,7 +123,7 @@
                     x:Name="SpheroSpeed"
                     Minimum="0"
                     Maximum="255"
-                    Value="157"
+                    Value="{Binding ConfiqurationSpeed}"
                     IsSnapToTickEnabled="True"
                     TickFrequency="1"
                     TickPlacement="Both"
@@ -172,7 +171,7 @@
                         <Label Content="4" Canvas.Left="150" Canvas.Top="270" />
                         <Line X1="0" Y1="150" X2="300" Y2="150"/>
                         <Line X1="150" Y1="0" X2="150" Y2="300"/>
-                        <Ellipse x:Name="ProectionPoint" Fill="Red" Canvas.Left="145" Canvas.Top="145">
+                        <Ellipse x:Name="ProjectionPoint" Fill="Red" Canvas.Left="145" Canvas.Top="145">
                             <Ellipse.Style>
                                 <Style TargetType="Ellipse">
                                     <Style.Triggers>
@@ -187,9 +186,9 @@
                             </Ellipse.Style>
                         </Ellipse>
                         <Ellipse x:Name="SpheroPoint" Fill="Gray" Canvas.Left="145" Canvas.Top="145"/>
-                        <Ellipse x:Name="ProectionHead" Fill="Blue" Canvas.Left="145" Canvas.Top="145"/>
-                        <Ellipse x:Name="ProectionHandRight" Fill="Green" Canvas.Left="145" Canvas.Top="145"/>
-                        <Ellipse x:Name="ProectionHandLeft" Fill="Green" Canvas.Left="145" Canvas.Top="145"/>
+                        <Ellipse x:Name="ProjectionHead" Fill="Blue" Canvas.Left="145" Canvas.Top="145"/>
+                        <Ellipse x:Name="ProjectionHandRight" Fill="Green" Canvas.Left="145" Canvas.Top="145"/>
+                        <Ellipse x:Name="ProjectionHandLeft" Fill="Green" Canvas.Left="145" Canvas.Top="145"/>
                     </Canvas>
                 </DockPanel>
             </DockPanel>

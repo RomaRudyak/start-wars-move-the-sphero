@@ -14,7 +14,7 @@ using System.Windows.Input;
 
 namespace SWMS.Configuration.ViewModels
 {
-    internal class SceneViewModel : BindableBase
+    internal class SceneViewModel : BindableBase, IDisposable
     {
         public String SpheroName
         {
@@ -52,26 +52,52 @@ namespace SWMS.Configuration.ViewModels
 
         public Point HeadXZProextion
         {
-            get { return _headXZProection; }
-            set { _headXZProection = value; }
+            get { return _headXZProjection; }
+            set
+            {
+                _headXZProjection = value;
+                OnPropertyChanged();
+            }
         }
 
         public Point HandRigthXZProextion
         {
-            get { return _handRigthXZProection; }
-            set { _handRigthXZProection = value; }
+            get { return _handRigthXZProjection; }
+            set
+            {
+                _handRigthXZProjection = value;
+                OnPropertyChanged();
+            }
         }
 
         public Point HandLeftXZProextion
         {
-            get { return _handLeftXZProection; }
-            set { _handLeftXZProection = value; }
+            get { return _handLeftXZProjection; }
+            set
+            {
+                _handLeftXZProjection = value;
+                OnPropertyChanged();
+            }
         }
 
         public Point SpheroXZProextion
         {
-            get { return _spheroXZProection; }
-            set { _spheroXZProection = value; }
+            get { return _spheroXZProjection; }
+            set
+            {
+                _spheroXZProjection = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public Point ForceXZProextion
+        {
+            get { return _forceXZProjection; }
+            set
+            {
+                _forceXZProjection = value;
+                OnPropertyChanged();
+            }
         }
 
         public Boolean IsSpheroConnected
@@ -105,6 +131,36 @@ namespace SWMS.Configuration.ViewModels
                 OnPropertyChanged();
             }
         }
+
+        public Int32 ConfigurationAngle
+        {
+            get { return _configurationAngle; }
+            set
+            {
+                if (_configurationAngle == value)
+                {
+                    return;
+                }
+                _configurationAngle = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public Int32 ConfiqurationSpeed
+        {
+            get { return _congiruationSpeed; }
+            set
+            {
+                if (_congiruationSpeed == value)
+                {
+                    return;
+                }
+                _congiruationSpeed = value;
+                OnPropertyChanged();
+            }
+        }
+
+
 
         public ICommand BeginConfigurationCommand
         {
@@ -143,6 +199,11 @@ namespace SWMS.Configuration.ViewModels
             GetSphero();
         }
 
+        public void Dispose()
+        {
+            Dispose(true);
+        }
+        
         public SceneViewModel()
         {
             _spheroPointTransform = new MatrixTransform()
@@ -152,6 +213,41 @@ namespace SWMS.Configuration.ViewModels
                     M22 = -1
                 }
             };
+
+            ConfigurationAngle = 0;
+            ConfiqurationSpeed = 155;
+        }
+
+        ~SceneViewModel()
+        {
+            Dispose(false);
+            GC.SuppressFinalize(this);
+        }
+
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                RemoveGeustureRecognizerIfNeeded();
+
+                if (_sphero != null)
+                {
+                    _sphero.Disconnect();
+                    _sphero = null;
+                }
+
+                if (_multiReader != null)
+                {
+                    _multiReader.Dispose();
+                    _multiReader = null;
+                }
+                if (_sensor != null)
+                {
+                    _sensor.Close();
+                    _sensor = null;
+                }
+            }
         }
 
 
@@ -244,9 +340,9 @@ namespace SWMS.Configuration.ViewModels
 
                 
 
-                HeadXZProextion = GetXZProection(posHead.X, posHead.Z);
-                HandRigthXZProextion = GetXZProection(posHandRight.X, posHandRight.Z);
-                HandLeftXZProextion = GetXZProection(posHandLeft.X, posHandLeft.Z);
+                HeadXZProextion = GetXZProjection(posHead.X, posHead.Z);
+                HandRigthXZProextion = GetXZProjection(posHandRight.X, posHandRight.Z);
+                HandLeftXZProextion = GetXZProjection(posHandLeft.X, posHandLeft.Z);
                 
                 if (_sphero != null)
                 {
@@ -255,7 +351,7 @@ namespace SWMS.Configuration.ViewModels
             }
         }
 
-        private Point GetXZProection(Double x, Double y)
+        private Point GetXZProjection(Double x, Double y)
         {
             return new Point(x, y);
         }
@@ -263,35 +359,106 @@ namespace SWMS.Configuration.ViewModels
 
         private void BeginConfiguration()
         {
+            if (!IsSpheroConnected)
+            {
+                return;
+            }
+
             IsInConfigurationMode = true;
+            RemoveGeustureRecognizerIfNeeded();
+
+            _sphero.BeginConfiguration();
+            _sphero.SetConfigurationAngle(0);
         }
 
         private void EndConfiguration()
         {
+            double newValue = ConfiqurationSpeed / 255;
+            _sphero.SetSpeedScale(newValue);
+            _sphero.EndConfiguration();
+            InitializeJediTracking();
             IsInConfigurationMode = false;
-
         }
-        
+
+        private void InitializeJediTracking()
+        {
+            RemoveGeustureRecognizerIfNeeded();
+            _jediGeustureRecognizer = new JediGestureRecognizer(_sensor);
+
+            _jediGeustureRecognizer.ForceApplying += JediForceApplying;
+            _jediGeustureRecognizer.ForceDispel += JediForceDispel;
+            _isSpheroGrabed = true;
+        }
+
+        private void RemoveGeustureRecognizerIfNeeded()
+        {
+            if (_jediGeustureRecognizer != null)
+            {
+                _jediGeustureRecognizer.ForceApplying -= JediForceApplying;
+                _jediGeustureRecognizer.ForceDispel -= JediForceDispel;
+                _jediGeustureRecognizer.Dispose();
+                _jediGeustureRecognizer = null;
+            }
+        }
 
 
-        private Point _headXZProection;
-        private Point _handRigthXZProection;
-        private Point _handLeftXZProection;
-        private Point _spheroXZProection;
+        private void JediForceDispel(object obj)
+        {
+            _sphero.StopMove();
+            _isSpheroGrabed = true;
+            IsForceApplying = false;
+        }
+
+        private void JediForceApplying(object arg1, Point forcePoint)
+        {
+            IsForceApplying = true;
+
+            var p = _spheroPointTransform.Transform(forcePoint);
+
+            if (_isSpheroGrabed)
+            {
+                _sphero.SetPosition(p);
+                _lastPoint = forcePoint;
+                _isSpheroGrabed = false;
+                return;
+            }
+
+            if (CoordinateHelper.GetDistance(_lastPoint, forcePoint) >= 0.04F)
+            {
+                _sphero.MoveTo(p.X, p.Y);
+            }
+
+            _lastPoint = forcePoint;
+        }
+
+        private Point _headXZProjection;
+        private Point _handRigthXZProjection;
+        private Point _handLeftXZProjection;
+        private Point _spheroXZProjection;
 
         private Boolean _kinecteIsAvailable;
         private String _spheroName;
+        private Boolean _isForceApplying;
+        private Boolean _isInConfigurationMode;
+        
+        private Int32 _configurationAngle;
+        private Int32 _congiruationSpeed;
+
+        private Point _lastPoint;
+        private Boolean _isSpheroGrabed = true;
+
         
         private WriteableBitmap _colorBitmap;
+
+        private ICommand _beginConfigurationCommand;
+        private ICommand _endConfigurationCommand;
 
         private KinectSensor _sensor;
         private MultiSourceFrameReader _multiReader;
         private JediSphero _sphero;
         private MatrixTransform _spheroPointTransform;
-        private bool _isForceApplying;
-        private bool _isInConfigurationMode;
-        private ICommand _beginConfigurationCommand;
-        private ICommand _endConfigurationCommand;
+        private JediGestureRecognizer _jediGeustureRecognizer;
+        private Point _forceXZProjection;
 
     }
 }
