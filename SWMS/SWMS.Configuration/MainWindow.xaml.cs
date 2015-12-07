@@ -255,6 +255,10 @@ namespace SWMS.Configuration
 
         private void JediForceDispel(object obj)
         {
+            if (Device != null)
+            {
+                Device.StopMove();
+            }
             _isSpheroGrabed = true;
             ProectionPoint.Visibility = Visibility.Hidden;
         }

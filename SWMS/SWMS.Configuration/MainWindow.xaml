@@ -90,7 +90,7 @@
                     x:Name="SpheroSpeed"
                     Minimum="0"
                     Maximum="255"
-                    Value="105"
+                    Value="157"
                     IsSnapToTickEnabled="True"
                     TickFrequency="1"
                     TickPlacement="Both"
