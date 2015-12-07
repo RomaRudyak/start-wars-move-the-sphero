@@ -67,6 +67,10 @@ namespace SWMS.WPF.JediSpheroTest
         private void SpheroPositionGrid_OnMouseUp(object sender, MouseButtonEventArgs e)
         {
             IsCaptured = false;
+            if (_device.IsInitialized)
+            {
+                _device.StopMove();
+            }
         }
 
         private void SpheroPositionGrid_OnMouseMove(object sender, MouseEventArgs e)
@@ -86,11 +90,11 @@ namespace SWMS.WPF.JediSpheroTest
             }
 
             // grid 500x500
-            int scale = (500 / 2);
+            int scale = (500 / 4);
 
             if (!_device.IsInitialized)
             {
-                _device.SetPosition(MousePositionX / scale, MousePositionY / scale);
+                _device.SetPosition(MousePositionX / scale, -(MousePositionY / scale));
                 SpheroPositionX = _device.CurrentX * scale;
                 SpheroPositionY = _device.CurrentY * scale;
                 Canvas.SetLeft(CurrentPoint, MousePositionX);
@@ -103,15 +107,15 @@ namespace SWMS.WPF.JediSpheroTest
                 var destinationPoint = _device.GetDestinationPosition();
 
                 Canvas.SetLeft(CurrentPoint, currentPoint.X * scale);
-                Canvas.SetTop(CurrentPoint, currentPoint.Y * scale);
+                Canvas.SetTop(CurrentPoint, -currentPoint.Y * scale);
 
                 Canvas.SetLeft(NextPoint, nextPoint.X * scale);
-                Canvas.SetTop(NextPoint, nextPoint.Y * scale);
+                Canvas.SetTop(NextPoint, -nextPoint.Y * scale);
 
                 Canvas.SetLeft(DestinationPoint, destinationPoint.X * scale);
-                Canvas.SetTop(DestinationPoint, destinationPoint.Y * scale);
+                Canvas.SetTop(DestinationPoint, -destinationPoint.Y * scale);
                 
-                _device.MoveTo(MousePositionX / scale, MousePositionY / scale);
+                _device.MoveTo(MousePositionX / scale, -(MousePositionY / scale));
 
                 Canvas.SetLeft(MousePointEllipse, MousePositionX);
                 Canvas.SetTop(MousePointEllipse, MousePositionY);
