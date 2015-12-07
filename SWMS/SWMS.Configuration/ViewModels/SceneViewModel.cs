@@ -273,9 +273,9 @@ namespace SWMS.Configuration.ViewModels
                         await Task.Delay(1000);
                         continue;
                     }
-                    SpheroName =_sphero.Name;
+
+                    SpheroName = _sphero.Name;
                     OnPropertyChanged(this.GetPropertyName(x => x.IsSpheroConnected));
-                    _sphero.SetPosition(1, -1);
                 }
             });
         }

@@ -78,9 +78,25 @@ namespace SWMS.Configuration
             }
             else if (e.PropertyName == _sceneViewModel.GetPropertyName(x=> x.IsForceApplying))
             {
-                ProjectionPoint.Visibility = _sceneViewModel.IsForceApplying
-                ? Visibility.Visible
-                : Visibility.Hidden;
+                Dispatcher.Invoke(() =>
+                {
+                    ProjectionPoint.Visibility = _sceneViewModel.IsForceApplying
+                    ? Visibility.Visible
+                    : Visibility.Hidden;
+                });
+            }
+            else if (e.PropertyName == _sceneViewModel.GetPropertyName(x=>x.KinecteIsAvailable))
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    KinectStatus.Content = _sceneViewModel.KinecteIsAvailable
+                    ? "Connected"
+                    : "Disconnected";
+                });
+            }
+            else if (e.PropertyName == _sceneViewModel.GetPropertyName(x=>x.IsSpheroConnected) && _sceneViewModel.IsSpheroConnected)
+            {
+                SpheroName.Content = String.Format("Connected: {0}", _sceneViewModel.SpheroName);
             }
         }
         
