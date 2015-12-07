@@ -17,6 +17,7 @@ using SWMS.Core;
 using SWMS.Core.JediSphero;
 using System.Diagnostics;
 using SWMS.Core.Helpers;
+using SWMS.Configuration.ViewModels;
 
 namespace SWMS.Configuration
 {
@@ -28,8 +29,12 @@ namespace SWMS.Configuration
         public MainWindow()
         {
             InitializeComponent();
+            _sceneViewModel = new SceneViewModel();
+            this.DataContext = _sceneViewModel;
             this.Loaded += MainWindow_Loaded;
             this.Closed += MainWindow_Closed;
+
+            _sceneViewModel.PropertyChanged += SceneViewModelPropertyChanged;
 
             _pointUIScaleTransform = new MatrixTransform()
             {
@@ -50,139 +55,40 @@ namespace SWMS.Configuration
                 }
             };
         }
-
+        
         public JediSphero Device { get; set; }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            _sensor = KinectSensor.GetDefault();
-
-            _sensor.IsAvailableChanged += IsAvailableChanged;
-
-            FrameDescription colorFrameDescription = _sensor.ColorFrameSource.CreateFrameDescription(ColorImageFormat.Bgra);
-
-            _colorBitmap = new WriteableBitmap(colorFrameDescription.Width, colorFrameDescription.Height, 96.0, 96.0, PixelFormats.Bgr32, null);
-
-            KinectViewSpace.Source = _colorBitmap;
-
-            _multiReader = _sensor.OpenMultiSourceFrameReader(FrameSourceTypes.Color | FrameSourceTypes.Depth | FrameSourceTypes.Body);
-
-            _multiReader.MultiSourceFrameArrived += FrameArrived;
-
-            _sensor.Open();
-
-            UpdateKinectStaus(_sensor.IsAvailable);
-
-            GetSphero();
+            _sceneViewModel.Initialize();
         }
 
-        private void GetSphero()
+        private void SceneViewModelPropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (Device != null)
+            if (e.PropertyName == _sceneViewModel.GetPropertyName(x => x.SpheroXZProextion))
             {
-                return;
+                SetPosition(SpheroPoint, _sceneViewModel.SpheroXZProextion);
             }
-
-            Task.Factory.StartNew(async () =>
+            else if (e.PropertyName == _sceneViewModel.GetPropertyName(x => x.HeadXZProextion))
             {
-                while (Device == null)
-                {
-                    Device = await SpheroManager.GetSpheroAsync();
-                    if (Device == null)
-                    {
-                        await Task.Delay(1000);
-                        continue;
-                    }
-                    Dispatcher.Invoke(() => SpheroName.Content = String.Format("Connected: {0}", Device.Name));
-                }
-            });
-        }
-
-        private void FrameArrived(object sender, MultiSourceFrameArrivedEventArgs e)
-        {
-            var multiframe = e.FrameReference.AcquireFrame();
-            DrawCameraView(multiframe);
-            HandBodyPartsOnGrid(multiframe);
-        }
-
-        private void HandBodyPartsOnGrid(MultiSourceFrame multiframe)
-        {
-            using (var bodyFrame = multiframe.BodyFrameReference.AcquireFrame())
+                SetPosition(ProectionHead, _sceneViewModel.HeadXZProextion);
+                
+            }
+            else if (e.PropertyName == _sceneViewModel.GetPropertyName(x => x.HandRigthXZProextion))
             {
-                if (bodyFrame == null)
-                {
-                    return;
-                }
-
-                var bodies = new Body[bodyFrame.BodyCount];
-                bodyFrame.GetAndRefreshBodyData(bodies);
-
-                var body = bodies.FirstOrDefault(b => b.IsTracked);
-                if (body == null)
-                {
-                    return;
-                }
-
-                var posHead = body.Joints[JointType.Head].Position;
-                var posHandRight = body.Joints[JointType.HandRight].Position;
-                var posHandLeft = body.Joints[JointType.HandLeft].Position;
-
-                SetPosition(ProectionHead, posHead.X, posHead.Z);
-                SetPosition(ProectionHandRight, posHandRight.X, posHandRight.Z);
-                SetPosition(ProectionHandLeft, posHandLeft.X, posHandLeft.Z);
-                if (Device != null)
-                {
-                    SetPosition(SpheroPoint, Device.CurrentX, -Device.CurrentY);
-                }
+                SetPosition(ProectionHandRight, _sceneViewModel.HandRigthXZProextion);
+            }
+            else if (e.PropertyName == _sceneViewModel.GetPropertyName(x => x.HandLeftXZProextion))
+            {
+                SetPosition(ProectionHandLeft, _sceneViewModel.HandLeftXZProextion);
             }
         }
-
-        private void SetPosition(UIElement obj, Double x, Double y)
+        
+        private void SetPosition(UIElement obj, Point point)
         {
-            var p = _pointUIScaleTransform.Transform(new Point(x, y));
+            var p = _pointUIScaleTransform.Transform(point);
             Canvas.SetLeft(obj, p.X);
             Canvas.SetTop(obj, p.Y);
-        }
-
-        private void DrawCameraView(MultiSourceFrame multiframe)
-        {
-            using (ColorFrame colorFrame = multiframe.ColorFrameReference.AcquireFrame())
-            {
-                if (colorFrame != null)
-                {
-                    FrameDescription colorFrameDescription = colorFrame.FrameDescription;
-
-                    using (KinectBuffer colorBuffer = colorFrame.LockRawImageBuffer())
-                    {
-                        this._colorBitmap.Lock();
-
-                        // verify data and write the new color frame data to the display bitmap
-                        if ((colorFrameDescription.Width == this._colorBitmap.PixelWidth) && (colorFrameDescription.Height == this._colorBitmap.PixelHeight))
-                        {
-                            colorFrame.CopyConvertedFrameDataToIntPtr(
-                                this._colorBitmap.BackBuffer,
-                                (uint)(colorFrameDescription.Width * colorFrameDescription.Height * 4),
-                                ColorImageFormat.Bgra);
-
-                            this._colorBitmap.AddDirtyRect(new Int32Rect(0, 0, this._colorBitmap.PixelWidth, this._colorBitmap.PixelHeight));
-                        }
-
-                        this._colorBitmap.Unlock();
-                    }
-                }
-            }
-        }
-
-        private void IsAvailableChanged(object sender, IsAvailableChangedEventArgs e)
-        {
-            UpdateKinectStaus(e.IsAvailable);
-        }
-
-        private void UpdateKinectStaus(Boolean isAvailable)
-        {
-            KinectStatus.Content = isAvailable
-                ? "Connected"
-                : "Disconnected";
         }
 
         private void MainWindow_Closed(object sender, EventArgs e)
@@ -263,11 +169,9 @@ namespace SWMS.Configuration
             ProectionPoint.Visibility = Visibility.Hidden;
         }
 
-        private void JediForceApplying(object arg1, PointF forcePoint)
+        private void JediForceApplying(object arg1, Point forcePoint)
         {
-            ProectionPoint.Visibility = Visibility.Visible;
-
-            var p = _spheroPointTransform.Transform(new Point(forcePoint.X, forcePoint.Y));
+            var p = _spheroPointTransform.Transform(forcePoint);
 
             if (_isSpheroGrabed)
             {
@@ -282,7 +186,6 @@ namespace SWMS.Configuration
                 Device.MoveTo(p.X, p.Y);
             }
             
-            SetPosition(ProectionPoint, forcePoint.X, forcePoint.Y);
             _lastPoint = forcePoint;
         }
 
@@ -297,7 +200,7 @@ namespace SWMS.Configuration
             Device.SetConfigurationAngle((int)angleValue);
         }
 
-        private PointF _lastPoint;
+        private Point _lastPoint;
         private WriteableBitmap _colorBitmap;
         private KinectSensor _sensor;
         private MultiSourceFrameReader _multiReader;
@@ -306,5 +209,6 @@ namespace SWMS.Configuration
         private Boolean _isSpheroGrabed = true;
         private MatrixTransform _pointUIScaleTransform;
         private MatrixTransform _spheroPointTransform;
+        private SceneViewModel _sceneViewModel;
     }
 }
