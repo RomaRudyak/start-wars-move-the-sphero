@@ -11,10 +11,11 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using SWMS.Core.Helpers;
 using System.Windows.Input;
+using System.Diagnostics;
 
 namespace SWMS.Configuration.ViewModels
 {
-    internal class SceneViewModel : BindableBase, IDisposable
+    public class SceneViewModel : BindableBase, IDisposable
     {
         public String SpheroName
         {
@@ -143,10 +144,14 @@ namespace SWMS.Configuration.ViewModels
                 }
                 _configurationAngle = value;
                 OnPropertyChanged();
+                if (IsInConfigurationMode)
+                {
+                    _sphero.SetConfigurationAngle(ConfigurationAngle);
+                }
             }
         }
 
-        public Int32 ConfiqurationSpeed
+        public Double ConfiqurationSpeed
         {
             get { return _congiruationSpeed; }
             set
@@ -270,6 +275,7 @@ namespace SWMS.Configuration.ViewModels
                     }
                     SpheroName =_sphero.Name;
                     OnPropertyChanged(this.GetPropertyName(x => x.IsSpheroConnected));
+                    _sphero.SetPosition(1, -1);
                 }
             });
         }
@@ -404,30 +410,37 @@ namespace SWMS.Configuration.ViewModels
 
         private void JediForceDispel(object obj)
         {
-            _sphero.StopMove();
-            _isSpheroGrabed = true;
+
+            if (_isSpheroGrabed)
+            {
+                _sphero.StopMove();                
+            }
+            _isSpheroGrabed = false;
             IsForceApplying = false;
+            Debug.WriteLine("Force end");
         }
 
         private void JediForceApplying(object arg1, Point forcePoint)
         {
+            Debug.WriteLine("Force Start");
             IsForceApplying = true;
 
             var p = _spheroPointTransform.Transform(forcePoint);
 
-            if (_isSpheroGrabed)
+            if (!_isSpheroGrabed)
             {
                 _sphero.SetPosition(p);
                 _lastPoint = forcePoint;
-                _isSpheroGrabed = false;
+                _isSpheroGrabed = true;
                 return;
             }
 
-            if (CoordinateHelper.GetDistance(_lastPoint, forcePoint) >= 0.04F)
+            if (CoordinateHelper.GetDistance(_lastPoint, forcePoint) >= 0.05F)
             {
                 _sphero.MoveTo(p.X, p.Y);
             }
 
+            ForceXZProextion = GetXZProjection(forcePoint.X, forcePoint.Y);
             _lastPoint = forcePoint;
         }
 
@@ -442,7 +455,7 @@ namespace SWMS.Configuration.ViewModels
         private Boolean _isInConfigurationMode;
         
         private Int32 _configurationAngle;
-        private Int32 _congiruationSpeed;
+        private Double _congiruationSpeed;
 
         private Point _lastPoint;
         private Boolean _isSpheroGrabed = true;

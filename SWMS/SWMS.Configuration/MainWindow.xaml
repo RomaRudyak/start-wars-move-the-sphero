@@ -123,7 +123,7 @@
                     x:Name="SpheroSpeed"
                     Minimum="0"
                     Maximum="255"
-                    Value="{Binding ConfiqurationSpeed}"
+                    Value="{Binding ConfiqurationSpeed, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                     IsSnapToTickEnabled="True"
                     TickFrequency="1"
                     TickPlacement="Both"
@@ -172,7 +172,7 @@
                         <Line X1="0" Y1="150" X2="300" Y2="150"/>
                         <Line X1="150" Y1="0" X2="150" Y2="300"/>
                         <Ellipse x:Name="ProjectionPoint" Fill="Red" Canvas.Left="145" Canvas.Top="145">
-                            <Ellipse.Style>
+                            <!--<Ellipse.Style>
                                 <Style TargetType="Ellipse">
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding Path=IsForceApplying}" Value="True">
@@ -183,7 +183,7 @@
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
-                            </Ellipse.Style>
+                            </Ellipse.Style>-->
                         </Ellipse>
                         <Ellipse x:Name="SpheroPoint" Fill="Gray" Canvas.Left="145" Canvas.Top="145"/>
                         <Ellipse x:Name="ProjectionHead" Fill="Blue" Canvas.Left="145" Canvas.Top="145"/>

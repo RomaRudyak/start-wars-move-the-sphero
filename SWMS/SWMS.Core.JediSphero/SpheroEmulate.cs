@@ -21,7 +21,7 @@ namespace SWMS.Core.JediSphero
         public JediSphero(SpheroConnection connection)
             : base(connection)
         {
-            double frequency = 10;
+            double frequency = 20;
             _msDelay = (int)(1000.0 / frequency);
 
             _connection = connection;

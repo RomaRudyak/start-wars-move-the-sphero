@@ -76,6 +76,12 @@ namespace SWMS.Configuration
             {
                 SetPosition(ProjectionHandLeft, _sceneViewModel.HandLeftXZProextion);
             }
+            else if (e.PropertyName == _sceneViewModel.GetPropertyName(x=> x.IsForceApplying))
+            {
+                ProjectionPoint.Visibility = _sceneViewModel.IsForceApplying
+                ? Visibility.Visible
+                : Visibility.Hidden;
+            }
         }
         
         private void SetPosition(UIElement obj, Point point)

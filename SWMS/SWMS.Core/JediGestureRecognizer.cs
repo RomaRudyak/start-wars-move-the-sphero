@@ -139,8 +139,7 @@ namespace SWMS.Core
                 Debug.WriteLine("Force Point: x={0} y={1}", point.X, point.Y);
                 ResetTrackingCounters();
             }
-
-            if (CanFireForesDispel())
+            else if (CanFireForesDispel())
             {
                 ForceDispel.SafeRise(this);
                 ResetTrackingCounters();
@@ -149,19 +148,19 @@ namespace SWMS.Core
 
         private Boolean CanFireForesDispel()
         {
-            return _handTrackedCount != 0 && _handTrackedCount != _frameCount;
+            return _frameCount % Frequency == 0 && _frameCount - _handTrackedCount > Epsylon;
         }
 
         private Boolean CanFireForesMove()
         {
-            return _frameCount % Frequency == 0 && _handTrackedCount == Frequency;
+            return _frameCount % Frequency == 0 && _frameCount - _handTrackedCount <= Epsylon;
         }
 
         private void ResetTrackingCounters(int reset = 0)
         {
             _handTrackedCount = reset;
             _headTrackedCount = reset;
-            _frameCount = 0;
+            _frameCount = reset;
         }
 
         private Boolean IsHandInInitialGesture(HandState handState)
@@ -177,6 +176,7 @@ namespace SWMS.Core
         private static readonly HandState InitialHandState = HandState.Open;
         private MultiSourceFrameReader _reader;
         private KinectSensor _sensor;
-        private readonly int Frequency = 4;
+        private readonly int Frequency = 8;
+        private readonly int Epsylon = 3;
     }
 }
