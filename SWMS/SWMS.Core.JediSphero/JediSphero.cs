@@ -1,199 +1,245 @@
 ﻿using System;
-using System.Diagnostics;
+using System.Threading;
+using System.Timers;
+using System.Windows;
 using Sphero.Communication;
 using Sphero.Devices;
 using Timer = System.Timers.Timer;
 
 namespace SWMS.Core.JediSphero
 {
-    public class _JediSphero : SpheroDevice
+    public sealed class JediSphero : SpheroDevice
     {
-        public _JediSphero(SpheroConnection connection)
+        public JediSphero(SpheroConnection connection)
             : base(connection)
         {
-            _connection = connection;
-        }
+            double frequency = 10.0;
+            _msDelay = (int)(1000.0 / frequency);
 
-        public string Name
-        {
-            get
-            {
-                return _connection.BluetoothName;
-            }
-        }
-        public double Scale { get; private set; }
-        public bool IsMoving
-        {
-            get { return _isMoving; }
-            private set { _isMoving = value; }
-        }
-        public double CurrentX
-        {
-            get { return _currentX; }
-            private set
-            {
-                if (value != _currentX)
-                {
-                    _currentX = value;
-                }
-            }
-        }
-        public double CurrentY
-        {
-            get { return _currentY; }
-            private set
-            {
-                if (value != _currentY)
-                {
-                    _currentY = value;
-                }
-            }
+            _connection = connection;
+            _currentX = 0.0;
+            _currentY = 0.0;
+
+            _speedScale = 0.5;
+            _spheroSpeed = 255.0 * _speedScale;
+            _timer = new Timer(_msDelay);
+            _timer.Elapsed += IterationHandler;
+            _timer.Start();
         }
 
         public bool IsInitialized { get; private set; }
 
-        #region Configuration
-
-        public void BeginConfigure()
+        public string Name
         {
+            get { return _connection.BluetoothName; }
+        }
+
+        public double CurrentX
+        {
+            get { return CurrentPoint.X; }
+        }
+
+        public double CurrentY
+        {
+            get { return CurrentPoint.Y; }
+        }
+
+        public Point CurrentPoint
+        {
+            get { return GetCurrentPosition(); }
+        }
+
+        public void StopMove()
+        {
+            var currentPosition = _nextIterationPoint;
+            SetCurrentPosition(currentPosition);
+            SetDestinationPosition(currentPosition);
+        }
+        
+        public void BeginConfiguration()
+        {
+            StopMove();
+
+            IsInitialized = false;
             SetRGBLED(255, 0, 0);
             SetBackLED(255);
+            _currentX = 0.0;
+            _currentY = 0.0;
+
+            _speedScale = 0.5;
+            _spheroSpeed = 255.0 * _speedScale;
+            _realSpeed = MAX_SPEED * _speedScale;
+            _iterationDistance = _realSpeed * (_msDelay / 1000.0);
         }
 
-        public void SetConfigurePosition(double x, double y)
+        public void SetSpeedScale(double scale)
         {
-            CurrentX = x;
-            CurrentY = y;
+            _speedScale = scale;
+            _spheroSpeed = 255.0 * _speedScale;
         }
 
-        public void SetConfigureAngle(int angle)
+        public void SetPosition(double x, double y)
         {
-            Debug.WriteLine(_configAngle);
+            SetPosition(new Point(x, y));
+        }
+
+        public void SetPosition(Point point)
+        {
+            SetNextIterationPosition(point);
+            SetCurrentPosition(point);
+            SetDestinationPosition(point);
+        }
+
+        public void SetConfigurationAngle(int angle)
+        {
             _configAngle = angle % 360;
-            base.Roll(angle, 0);
+            Roll(angle, 0);
         }
 
-        public void SetSpeedScale(double speedScale)
+        public void EndConfiguration()
         {
-            Debug.WriteLine("Speed scale : {0}", speedScale);
-            Scale = speedScale;
-        }
-
-        public void EndConfigure()
-        {
-            SetHeading(_configAngle);
             SetRGBLED(0, 127, 0);
             SetBackLED(0);
+            SetHeading(_configAngle);
             IsInitialized = true;
         }
 
-        #endregion
-
         public void MoveTo(double x, double y)
         {
-            if (IsMoving)
-            {
-                return;
-            }
-
-            var distance = GetDistance(x, y);
-            var angle = GetAngle(x, y);
-
-            var realSpeed = MAX_SPEED * Scale;
-            var time = (distance / realSpeed) * 1000;
-
-            var str = ""
-                      + string.Format("time(ms): {0}", time)
-                      + string.Format("\nangle: {0}", angle)
-                      + string.Format("\ndistance: {0}", distance)
-                      + string.Format("\nspeed: {0}", realSpeed)
-                      + string.Format("\nbefore: x: {0}  y: {1}", CurrentX, CurrentY)
-                      + string.Format("\ndestination: x:{0}, y:{1}", x, y)
-                      + string.Format("\nstart moving");
-
-            Debug.WriteLine(str);
-
-            var spheroSpeed = GetSpheroSpeed();
-            SetTempDeltaXY(x, y);
-            Roll(angle, spheroSpeed, time);
+            MoveTo(new Point(x, y));
         }
 
-
-
-        public void Roll(double angle, double speed, double miliseconds)
+        public void MoveTo(Point point)
         {
-            if (IsMoving)
-            {
-                return;
-            }
-
-            if (miliseconds == 0)
-            {
-                return;
-            }
-            SetRGBLED(0, 0, 255);
-
-
-            var timer = new Timer(miliseconds);
-
-            timer.Elapsed += (sender, args) =>
-            {
-                SetRGBLED(0, 255, 0);
-                base.Roll((int)angle, 0);
-                UpdateXY();
-                IsMoving = false;
-                Debug.WriteLine("\nstop moving\n-------------");
-                timer.Stop();
-            };
-
-            IsMoving = true;
-            timer.Start();
-            base.Roll((int)angle, (int)(speed));
+            SetDestinationPosition(point);
         }
 
-        private double GetDistance(double x, double y)
+        public void Disconnect()
         {
-            var dx = x - CurrentX;
-            var dy = y - CurrentY;
+            _timer.Stop();
+            _connection.Disconnect();
+        }
+
+        public Point GetNextPoint()
+        {
+            return _nextIterationPoint;
+        }
+
+        public Point GetDestinationPosition()
+        {
+            var x = Interlocked.Exchange(ref _destinationX, _destinationX);
+            var y = Interlocked.Exchange(ref _destinationY, _destinationY);
+            return new Point(x, y);
+        }
+
+        public Point GetCurrentPosition()
+        {
+            var x = Interlocked.Exchange(ref _currentX, _currentX);
+            var y = Interlocked.Exchange(ref _currentY, _currentY);
+            return new Point(x, y);
+        }
+
+        private void IterationHandler(object sender, ElapsedEventArgs arhs)
+        {
+            if (!IsInitialized)
+            {
+                return;
+            }
+
+            Point currentPosition = _nextIterationPoint;
+            SetCurrentPosition(currentPosition);
+            Point destinationPosition = GetDestinationPosition();
+            double spheroAngle = GetSpheroAngle(currentPosition, destinationPosition);
+            double realDistance = GetDistance(currentPosition, destinationPosition);
+
+            if (realDistance >= _iterationDistance)
+            {
+                _lastAngle = (int)spheroAngle;
+                Roll(_lastAngle, (int)_spheroSpeed);
+                double realAngle = GetAngle(currentPosition, destinationPosition);
+                var nextPoint = CalculateNextIterationPosition(currentPosition, realAngle, _iterationDistance);
+                SetNextIterationPosition(nextPoint);
+            }
+            else
+            {
+                Roll(_lastAngle, 0);
+            }
+        }
+
+        private void SetCurrentPosition(Point point)
+        {
+            Interlocked.Exchange(ref _currentX, point.X);
+            Interlocked.Exchange(ref _currentY, point.Y);
+        }
+
+        private void SetNextIterationPosition(Point point)
+        {
+            _nextIterationPoint = point;
+        }
+
+        private Point CalculateNextIterationPosition(Point a, double angle, double distance)
+        {
+            var dy = Math.Cos((angle * Math.PI / 180)) * distance;
+            var dx = Math.Sin((angle * Math.PI / 180)) * distance;
+
+            var newX = a.X + dx;
+            var newY = a.Y + dy;
+            return new Point(newX, newY);
+        }
+        
+        private void SetDestinationPosition(Point point)
+        {
+            Interlocked.Exchange(ref _destinationX, point.X);
+            Interlocked.Exchange(ref _destinationY, point.Y);
+        }
+
+        private double GetDistance(Point a, Point b)
+        {
+            var dx = b.X - a.X;
+            var dy = b.Y - a.Y;
             var distance = Math.Sqrt(dx * dx + dy * dy);
             return distance;
         }
 
-        private double GetAngle(double x, double y)
+        private double GetSpheroAngle(Point a, Point b)
         {
-            var dx = x - CurrentX;
-            var dy = y - CurrentY;
+            var dx = b.X - a.X;
+            var dy = b.Y - a.Y;
+
             var angle = Math.Atan2(dx, dy) * (180 / Math.PI);
             angle = angle < 0 ? angle + 360 : angle;
             return angle;
         }
 
-        private double GetSpheroSpeed()
+        private static double GetAngle(Point a, Point b)
         {
-            return 255.0 * Scale;
-        }
-        
-        private void SetTempDeltaXY(double x, double y)
-        {
-            _tempdX = x - CurrentX;
-            _tempdY = y - CurrentY;
-        }
+            var dx = b.X - a.X;
+            var dy = b.Y - a.Y;
 
-        private void UpdateXY()
-        {
-            CurrentX += _tempdX;
-            CurrentY += _tempdY;
+            var angle = Math.Atan2(dx, dy) * (180 / Math.PI);
+            return angle;
         }
-
-        private const double MAX_SPEED = 2.0;
 
         private readonly SpheroConnection _connection;
-        private int _configAngle = 0;
-        private double _currentX = 0;
-        private double _currentY = 0;
-        private volatile bool _isMoving;
 
-        private double _tempdX = 0.0;
-        private double _tempdY = 0.0;
+        private Timer _timer;
+        private Point _nextIterationPoint;
+        private double _iterationDistance;
+        private volatile int _lastAngle;
+        private double _realSpeed;
+
+        private double _currentX;
+        private double _currentY;
+
+        private double _destinationX;
+        private double _destinationY;
+
+        private int _configAngle;
+
+        private double _speedScale;
+        private double _spheroSpeed;
+
+        private const double MAX_SPEED = 2.0;
+        private readonly int _msDelay;
     }
 }
