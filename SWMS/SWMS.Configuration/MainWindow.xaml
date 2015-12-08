@@ -91,7 +91,8 @@
                 >
                 <Button 
                     DockPanel.Dock="Top"
-                    Content="Begin Configuration" 
+                    Content="Begin Configuration"
+                    x:Name="BeginConfiguration"
                     IsEnabled="{Binding IsSpheroConnected}"
                     Command="{Binding BeginConfigurationCommand}"/>
                 <TextBlock

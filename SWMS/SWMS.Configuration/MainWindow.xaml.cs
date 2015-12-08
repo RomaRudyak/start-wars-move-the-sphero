@@ -96,7 +96,11 @@ namespace SWMS.Configuration
             }
             else if (e.PropertyName == _sceneViewModel.GetPropertyName(x=>x.IsSpheroConnected) && _sceneViewModel.IsSpheroConnected)
             {
-                SpheroName.Content = String.Format("Connected: {0}", _sceneViewModel.SpheroName);
+                Dispatcher.Invoke(() =>
+                {
+                    SpheroName.Content = String.Format("Connected: {0}", _sceneViewModel.SpheroName);
+                    BeginConfiguration.IsEnabled = true;
+                });
             }
         }
         
