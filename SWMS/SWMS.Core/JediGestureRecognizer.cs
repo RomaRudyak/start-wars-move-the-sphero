@@ -129,10 +129,15 @@ namespace SWMS.Core
             {
                 var handPosition = _lastHandPosition;
                 var headPosition = _lastHeadPosition;
-
-                var x = CoordinateHelper.FindPointProjection(headPosition.GetProjectionForXZ(), handPosition.GetProjectionForXZ());
+                
+                
+                // ZY Projection
                 var headZY = headPosition.GetProjectionForZY();
-                var y = CoordinateHelper.FindPointProjection(headZY, handPosition.GetProjectionForZY());
+                var handZY = handPosition.GetProjectionForZY();
+                var y = CoordinateHelper.FindPointProjection(headZY, handZY);
+                
+                // XZ Projection
+                var x = CoordinateHelper.FindPointProjection(headPosition.GetProjectionForXZ(), handPosition.GetProjectionForXZ(), y);
 
                 var point = new Point { X = x, Y = y };
                 ForceApplying.SafeRise(this, point);
