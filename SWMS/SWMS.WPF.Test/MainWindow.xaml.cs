@@ -106,7 +106,7 @@ namespace SWMS.WPF.Test
             Canvas.SetTop(el, 395 + head.Position.Y * -40);
         }
 
-        private void ForceApplying(object sender, PointF point)
+        private void ForceApplying(object sender, Point point)
         {
             Out.Text = Out.Text.Insert(0, String.Format("x={0:F2} y={1:F2}\n", point.X, point.Y));
             // XZ
